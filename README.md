@@ -1,32 +1,37 @@
-# React + TypeScript + Vite
+# 高项 2027 练习平台
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + Vite + TypeScript 练习平台，包含：
 
-Currently, two official plugins are available:
+- 12 个章节、600 道四选一题，答题后立即显示解析；
+- 本地错题本：错题自动收录，重新答对即移除；
+- 八大绩效域独立置顶，另含 40 道专项练习；
+- 每章论文范围、采分点和练笔动作；
+- 计算、案例、ITTO、论文、记忆与冲刺专题。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 本地运行
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+运行检查：
+
+```bash
+npm run test
+npm run build
+```
+
+## 数据与隐私
+
+题目随应用构建发布。答题进度和错题本仅保存到浏览器 `localStorage`，没有账号、数据库或远程个人数据存储；清除浏览器站点数据即可删除学习记录。
+
+## 部署
+
+Cloudflare Pages 项目：`gaoxiang-2027-practice`。
+
+```bash
+npm run deploy
+```
+
+部署脚本构建 `dist` 后用 Wrangler 上传至 Pages。生产地址：<https://gaoxiang-2027-practice.pages.dev/>。
