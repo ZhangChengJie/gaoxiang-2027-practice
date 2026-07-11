@@ -8,6 +8,7 @@ import SpecialTests from './pages/SpecialTests'
 import TestSession from './pages/TestSession'
 import WrongBook from './pages/WrongBook'
 import Essay from './pages/Essay'
+import CaseAnalysis from './pages/CaseAnalysis'
 import './styles/wechat.css'
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/test/:type" element={<TestSession />} />
           <Route path="/wrong" element={<WrongBook />} />
           <Route path="/essay" element={<Essay />} />
+          <Route path="/case" element={<CaseAnalysis />} />
         </Routes>
         <TabBar />
       </div>

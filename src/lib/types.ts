@@ -40,3 +40,22 @@ export type Progress = {
   answered: Record<string, boolean>
   wrong: Record<string, WrongRecord>
 }
+
+export type CaseCategory = {
+  id: string
+  title: string
+  icon: string
+}
+
+export type CaseSection = {
+  title: string
+  content: string[]
+}
+
+export type CaseContent = {
+  id: string
+  categoryId: string
+  title: string
+  description: string
+  sections: CaseSection[]
+}

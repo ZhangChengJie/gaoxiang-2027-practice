@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 const tabs = [
   { path: '/', label: '首页', icon: '🏠' },
+  { path: '/case', label: '案例', icon: '📋' },
   { path: '/specials', label: '专项', icon: '📝' },
   { path: '/wrong', label: '错题本', icon: '📕' },
   { path: '/essay', label: '论文', icon: '✍️' },

@@ -905,6 +905,166 @@ html, body {
 }
 
 /* ========================================
+   Case Analysis Page
+   ======================================== */
+.case-category-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.case-category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.case-category-tab {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--card);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.case-category-tab.active {
+  background: var(--primary);
+  color: white;
+}
+
+.case-category-icon {
+  font-size: 18px;
+}
+
+.case-category-label {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.case-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.case-card {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  overflow: hidden;
+  border-left: 4px solid var(--primary);
+  transition: box-shadow 0.15s;
+}
+
+.case-card-header {
+  padding: 18px 18px 0;
+}
+
+.case-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+
+.case-card-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.case-card-body {
+  padding: 0 18px 18px;
+}
+
+.case-section {
+  margin-bottom: 16px;
+}
+
+.case-section:last-child {
+  margin-bottom: 0;
+}
+
+.case-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.case-section-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.case-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.case-list-item {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #555;
+  padding: 6px 0 6px 16px;
+  position: relative;
+  word-break: break-word;
+}
+
+.case-list-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ccc;
+}
+
+.case-list-spacer {
+  height: 4px;
+  list-style: none;
+}
+
+.case-empty {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+@media (max-width: 420px) {
+  .case-category-tab {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .case-category-icon {
+    font-size: 16px;
+  }
+}
+
+/* ========================================
    Page Transitions & Animations
    ======================================== */
 @keyframes fadeIn {
