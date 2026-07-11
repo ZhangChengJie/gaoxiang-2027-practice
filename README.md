@@ -1,12 +1,19 @@
 # 高项 2027 练习平台
 
-React + Vite + TypeScript 练习平台，包含：
+React + TypeScript + Vite 构建的移动优先练习平台，**微信小程序风格 UI**。
 
-- 12 个章节、600 道四选一题，答题后立即显示解析；
-- 本地错题本：错题自动收录，重新答对即移除；
-- 八大绩效域独立置顶，另含 40 道专项练习；
-- 每章论文范围、采分点和练笔动作；
-- 计算、案例、ITTO、论文、记忆与冲刺专题。
+## 功能
+
+- **12 章 600 题**：覆盖高项全部知识领域，答题后立即显示解析
+- **9 大专项训练**：
+  - 绩效域专项 · 计算题专项 · 法律法规专项
+  - ITTO 高频链路 · 案例分析 · 记忆与复盘
+  - **易错考点**（动态提取高频错题）
+  - **综合模考**（随机 75 题）
+  - 六周冲刺
+- **错题本**：自动收录错题，记录错误次数和时间，按章节分组，练习正确自动移除
+- **论文范围**：每章完整论文范围、采分点、练笔动作、关键词
+- **微信小程序风格 UI**：白底绿主色、底部 Tab 导航、移动端优先
 
 ## 本地运行
 
@@ -22,16 +29,18 @@ npm run test
 npm run build
 ```
 
-## 数据与隐私
+## 技术栈
 
-题目随应用构建发布。答题进度和错题本仅保存到浏览器 `localStorage`，没有账号、数据库或远程个人数据存储；清除浏览器站点数据即可删除学习记录。
+- React 19 + TypeScript 6
+- React Router v7
+- Vite 8 + Vitest
+- localStorage（无后端）
+- Cloudflare Pages
 
 ## 部署
-
-Cloudflare Pages 项目：`gaoxiang-2027-practice`。
 
 ```bash
 npm run deploy
 ```
 
-部署脚本构建 `dist` 后用 Wrangler 上传至 Pages。生产地址：<https://gaoxiang-2027-practice.pages.dev/>。
+生产地址：<https://gaoxiang-2027-practice.pages.dev/>

@@ -1,4 +1,5 @@
-export type Question = { id: string; chapter: string; text: string; options: string[]; answer: number; explanation: string }
+import type { Question } from '../lib/types'
+
 export type Essay = { chapter: string; title: string; scope: string; points: string[] }
 
 const raws = import.meta.glob('../content/questions/*.md', { eager: true, query: '?raw', import: 'default' }) as Record<string, string>
@@ -39,3 +40,5 @@ export const performanceQuestions: Question[] = perfFacts.flatMap(([term, desc],
   const answer = (i + j) % 4; const opts = [...choices]; [opts[0], opts[answer]] = [opts[answer], opts[0]]
   return { id: `pd-${i}-${j}`, chapter: 'performance', text: `下列哪项最符合“${desc}”的绩效域？`, options: opts, answer, explanation: `${term}的核心是：${desc}。` }
 }))
+
+export const allQuestions: Question[] = [...chapters.flatMap((c) => c.questions), ...performanceQuestions]
