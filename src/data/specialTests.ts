@@ -21,11 +21,7 @@ export const specialTests: SpecialTest[] = [
     description: '数据安全法 / 个保法 / 信息安全法',
     icon: '⚖️',
     filter: (questions: Question[]) =>
-      questions.filter(
-        (q) =>
-          q.chapter === '05-绩效域高级管理法规' &&
-          (q.text.includes('法规') || q.text.includes('法') || q.text.includes('合规') || q.text.includes('安全')),
-      ),
+      questions.filter((q) => q.chapter === '13-高级管理与辅助知识域'),
   },
   {
     key: 'itto',
@@ -86,5 +82,33 @@ export const specialTests: SpecialTest[] = [
     description: '考前冲刺高频题目',
     icon: '🚀',
     filter: (questions: Question[]) => questions.filter((q) => q.chapter === '11-六周冲刺'),
+  },
+  {
+    key: 'pmfundamentals',
+    title: '项目管理概论',
+    description: '项目基础·立项·组织·生命周期',
+    icon: '📘',
+    filter: (questions: Question[]) => questions.filter((q) => q.chapter === '12-项目管理概论与立项管理'),
+  },
+  {
+    key: 'advanced',
+    title: '高级管理与法规',
+    description: 'OPM·配置变更·法律法规·英语',
+    icon: '🏛️',
+    filter: (questions: Question[]) => questions.filter((q) => q.chapter === '13-高级管理与辅助知识域'),
+  },
+  {
+    key: 'newtech',
+    title: '新一代信息技术',
+    description: '云计算·大数据·AI·区块链·5G·安全',
+    icon: '💻',
+    filter: (questions: Question[]) => questions.filter((q) => q.chapter === '14-新一代信息技术详解'),
+  },
+  {
+    key: 'risk-proc-stake',
+    title: '风险·采购·干系人',
+    description: '风险管理·合同类型·干系人管理',
+    icon: '🔐',
+    filter: (questions: Question[]) => questions.filter((q) => q.chapter === '15-风险采购干系人管理'),
   },
 ]
