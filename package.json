@@ -9,7 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name gaoxiang-2027-practice"
+    "deploy": "npm run build && wrangler pages deploy dist --project-name gaoxiang-2027-practice --force"
   },
   "dependencies": {
     "react": "^19.2.7",
