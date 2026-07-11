@@ -48,6 +48,13 @@ html, body {
   padding-bottom: calc(var(--tabbar-height) + var(--safe-area-bottom) + 8px);
 }
 
+/* PWA standalone mode - extra padding for status bar */
+@media (display-mode: standalone) {
+  .app {
+    padding-top: env(safe-area-inset-top, 20px);
+  }
+}
+
 .page {
   padding: 16px;
   max-width: 600px;
