@@ -1,19 +1,25 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { chapters } from '../data/content'
 import { essayContents } from '../data/essayContent'
 
 export default function Essay() {
   const [activeChapter, setActiveChapter] = useState(chapters[0]?.key ?? '')
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const currentEssay = essayContents.find((e) => e.chapter === activeChapter)
   const currentChapter = chapters.find((c) => c.key === activeChapter)
+
+  useEffect(() => {
+    const el = scrollRef.current?.querySelector(`[data-key="${activeChapter}"]`) as HTMLElement
+    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }, [activeChapter])
 
   if (!currentEssay || !currentChapter) {
     return (
       <div className="page essay-page">
         <div className="page-header">
           <h1>论文范围</h1>
-          <p>请选择章节查看对应论文范围</p>
+          <p>选择章节查看对应论文写作知识点</p>
         </div>
         <div className="essay-chapter-list">
           {chapters.map((c) => (
@@ -29,52 +35,86 @@ export default function Essay() {
   return (
     <div className="page essay-page">
       <div className="page-header">
-        <h1>论文范围</h1>
-        <p>选择章节查看对应论文主题与采分点</p>
+        <h1>论文写作知识点</h1>
+        <p>每个章节涵盖完整的论文写作要点</p>
       </div>
 
-      <div className="essay-chapter-select">
-        {chapters.map((c) => (
-          <button
-            key={c.key}
-            className={`chip ${activeChapter === c.key ? 'active' : ''}`}
-            onClick={() => setActiveChapter(c.key)}
-          >
-            {c.title}
-          </button>
-        ))}
+      <div className="essay-chips-wrapper" ref={scrollRef}>
+        <div className="essay-chips-scroll">
+          {chapters.map((c) => (
+            <button
+              key={c.key}
+              data-key={c.key}
+              className={`chip ${activeChapter === c.key ? 'active' : ''}`}
+              onClick={() => setActiveChapter(c.key)}
+            >
+              {c.title}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="essay-card">
-        <h2 className="essay-title">{currentEssay.title}</h2>
+      <div className="essay-section-card essay-section-scope">
+        <div className="essay-section-header">
+          <span className="essay-section-icon">📋</span>
+          <div>
+            <h3 className="essay-section-title">论文主题</h3>
+            <p className="essay-section-subtitle">{currentEssay.title}</p>
+          </div>
+        </div>
+        <div className="essay-section-body">
+          <p className="essay-scope-text">{currentEssay.scope}</p>
+        </div>
+      </div>
 
-        <section className="essay-section">
-          <h3>📌 论文范围</h3>
-          <p>{currentEssay.scope}</p>
-        </section>
-
-        <section className="essay-section">
-          <h3>🎯 采分点</h3>
-          <ul className="essay-points">
+      <div className="essay-section-card essay-section-points">
+        <div className="essay-section-header">
+          <span className="essay-section-icon">🎯</span>
+          <div>
+            <h3 className="essay-section-title">关键知识点</h3>
+            <p className="essay-section-subtitle">{currentEssay.points.length} 个论文写作要点</p>
+          </div>
+        </div>
+        <div className="essay-section-body">
+          <ul className="essay-points-list">
             {currentEssay.points.map((p, i) => (
-              <li key={i}>{p}</li>
+              <li key={i}>
+                <span className="essay-point-num">{i + 1}</span>
+                <span>{p}</span>
+              </li>
             ))}
           </ul>
-        </section>
+        </div>
+      </div>
 
-        <section className="essay-section">
-          <h3>✍️ 练笔动作</h3>
-          <p>{currentEssay.practice}</p>
-        </section>
+      <div className="essay-section-card essay-section-practice">
+        <div className="essay-section-header">
+          <span className="essay-section-icon">✍️</span>
+          <div>
+            <h3 className="essay-section-title">练笔动作</h3>
+            <p className="essay-section-subtitle">动手写才能真正掌握</p>
+          </div>
+        </div>
+        <div className="essay-section-body">
+          <p className="essay-practice-text">{currentEssay.practice}</p>
+        </div>
+      </div>
 
-        <section className="essay-section">
-          <h3>🔑 关键词</h3>
-          <div className="essay-keywords">
+      <div className="essay-section-card essay-section-keywords">
+        <div className="essay-section-header">
+          <span className="essay-section-icon">🔑</span>
+          <div>
+            <h3 className="essay-section-title">核心关键词</h3>
+            <p className="essay-section-subtitle">写作中可以嵌入的重要术语</p>
+          </div>
+        </div>
+        <div className="essay-section-body">
+          <div className="essay-keywords-cloud">
             {currentEssay.keywords.map((kw) => (
               <span key={kw} className="keyword-tag">{kw}</span>
             ))}
           </div>
-        </section>
+        </div>
       </div>
     </div>
   )
