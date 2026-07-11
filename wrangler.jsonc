@@ -3,6 +3,5 @@
   "name": "gaoxiang-2027-practice",
   "pages_build_output_dir": "./dist",
   "compatibility_date": "2026-07-11",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true, "head_sampling_rate": 1 }
+  "compatibility_flags": ["nodejs_compat"]
 }
