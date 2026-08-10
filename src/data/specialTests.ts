@@ -111,4 +111,11 @@ export const specialTests: SpecialTest[] = [
     icon: '🔐',
     filter: (questions: Question[]) => questions.filter((q) => q.chapter === '15-风险采购干系人管理'),
   },
+  {
+    key: 'exam-2026',
+    title: '2026 真题相似专项',
+    description: '基于 2026 上半年真题考查方向的原创改编题',
+    icon: '🆕',
+    filter: (questions: Question[]) => questions.filter((q) => q.chapter === '16-2026真题相似知识点'),
+  },
 ]

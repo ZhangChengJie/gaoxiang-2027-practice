@@ -11,9 +11,10 @@ const titleMap: Record<string, string> = {
   '09a-论文范文集': '论文范文集', '10-记忆与复盘': '记忆与复盘', '11-六周冲刺': '六周冲刺',
   '12-项目管理概论与立项管理': '项目管理概论与立项管理', '13-高级管理与辅助知识域': '高级管理与辅助知识域',
   '14-新一代信息技术详解': '新一代信息技术详解', '15-风险采购干系人管理': '风险·采购·干系人管理',
+  '16-2026真题相似知识点': '2026 真题相似知识点',
 }
 export const chapters = Object.entries(raws).map(([path, raw]) => {
-  const key = path.split('/').pop()!.replace('-50题.md', '')
+  const key = path.split('/').pop()!.replace(/-\d+题\.md$/, '')
   const questions: Question[] = raw.split('\n## ').slice(1).map((part, i) => {
     const text = part.split('\n\n')[0].replace(/^\d+\.\s*/, '')
     const options = [...part.matchAll(/^([ABCD])\.\s+(.+)$/gm)].map((m) => m[2])
