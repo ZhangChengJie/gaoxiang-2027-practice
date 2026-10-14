@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { buildDailyPlan, DAILY_NEW_COUNT, DAILY_REVIEW_COUNT } from './dailyPlan'
-import { MOCK_WEIGHTS } from './mock'
+import { DOMAINS } from '../data/domains'
 import { applyAnswer, emptyProgress, removeWrong } from './progress'
 import type { Question } from './types'
 
-const [low, high, medium] = Object.keys(MOCK_WEIGHTS)
+const [low, high, medium] = DOMAINS.filter((domain) => domain.mockWeight > 0).map((domain) => domain.key)
 const now = 1000000000
-function question(chapter: string, n: number): Question {
-  return { id: `${chapter}-${n}`, chapter, text: '题目', options: ['A'], answer: 0, explanation: '解析' }
+function question(domain: string, n: number, chapter = 'mixed'): Question {
+  return { id: `${domain}-${n}`, chapter, domain, topic: '基础概念', text: '题目', options: ['A'], answer: 0, explanation: '解析' }
 }
 
 describe('dailyPlan:', () => {
@@ -24,8 +24,8 @@ describe('dailyPlan:', () => {
     expect(plan.fresh.some((q) => plan.review.includes(q))).toBe(false)
   })
 
-  it('fresh 优先低正确率章节，跨章轮转且章内保持原题号顺序', () => {
-    const qs = [high, medium, low].flatMap((chapter) => Array.from({ length: 21 }, (_, i) => question(chapter, i + 1)))
+  it('fresh 优先低正确率知识域，同章跨域轮转且域内保持原题号顺序', () => {
+    const qs = [high, medium, low].flatMap((domain) => Array.from({ length: 21 }, (_, i) => question(domain, i + 1)))
     let p = applyAnswer(emptyProgress(), question(low, 21).id, false, now)
     p = applyAnswer(p, question(high, 21).id, true, now)
     // medium 无历史，按 0.5 排在正确率 0 和 1 之间。
@@ -36,8 +36,8 @@ describe('dailyPlan:', () => {
       question(low, 1).id, question(medium, 1).id, question(high, 1).id,
       question(low, 2).id, question(medium, 2).id, question(high, 2).id,
     ])
-    for (const chapter of [low, medium, high]) {
-      expect(plan.fresh.filter((q) => q.chapter === chapter)).toHaveLength(10)
+    for (const domain of [low, medium, high]) {
+      expect(plan.fresh.filter((q) => q.domain === domain)).toHaveLength(10)
     }
     expect(p).toEqual(original)
   })
@@ -52,7 +52,7 @@ describe('dailyPlan:', () => {
     p = applyAnswer(p, pending.id, false, now)
     p.wrong[pending.id].nextReviewAt = now + 1
     p.answered[old.id] = true
-    const ignored = question('performance', 1)
+    const ignored = question('advanced', 1)
     const qs = [highQ, lowQ, newQ, recent, pending, old, ignored]
     const plan = buildDailyPlan(qs, p, now, () => 0)
     expect(plan.review).toEqual([])
@@ -68,5 +68,40 @@ describe('dailyPlan:', () => {
     const plan = buildDailyPlan([...qs, qs[0]], p, now, () => 0)
     expect(plan.fresh).toHaveLength(30)
     expect(new Set(plan.fresh.map((q) => q.id)).size).toBe(30)
+  })
+
+  it('同域跨章合并累计正确率，生成绩效题和英文入选新题，零权重和未知域排除', () => {
+    const failed = question('risk', 10, 'chapter-a')
+    const passed = question('risk', 11, 'chapter-b')
+    let p = applyAnswer(emptyProgress(), failed.id, false, now)
+    p = applyAnswer(p, passed.id, true, now)
+    const costHistory = question('cost', 10)
+    p = applyAnswer(applyAnswer(p, costHistory.id, false, now), costHistory.id, false, now)
+    p = applyAnswer(p, costHistory.id, true, now)
+    const cost = question('cost', 1)
+    const risk = question('risk', 1)
+    const english = question('english', 1, '20-英文术语')
+    const perf = question('performance', 1, 'performance')
+    const ignored = ['method', 'advanced', 'unknown'].map((domain) => question(domain, 1))
+    const plan = buildDailyPlan([risk, cost, english, perf, failed, passed, costHistory, ...ignored], p, now, () => 0)
+    expect(plan.fresh.slice(0, 4)).toEqual([cost, risk, english, perf])
+    expect(plan.fresh.some((q) => ignored.includes(q))).toBe(false)
+  })
+
+  it('到期方法域错题仍复习，但不作为 fresh 候选；固定 rng 可复现同正确率域的轮转顺序', () => {
+    const method = question('method', 1)
+    const advanced = question('advanced', 1)
+    const p = applyAnswer(emptyProgress(), method.id, false, now)
+    const qs = [method, advanced, ...[low, high, medium].flatMap((domain) => [question(domain, 1), question(domain, 2)])]
+    const original = structuredClone(qs)
+    const build = () => {
+      const values = [0.9, 0.1, 0.5]
+      return buildDailyPlan(qs, p, now, () => values.shift()!)
+    }
+    expect(build()).toEqual(build())
+    expect(build().review).toEqual([method])
+    expect(build().fresh.slice(0, 3).map((q) => q.domain)).toEqual([high, medium, low])
+    expect(build().fresh).toHaveLength(6)
+    expect(qs).toEqual(original)
   })
 })

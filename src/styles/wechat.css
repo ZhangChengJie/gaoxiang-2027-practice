@@ -1755,3 +1755,249 @@ button:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ========================================
+   知识域 / 案例实战 / 提纲练习
+   ======================================== */
+.weak-card {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--danger-border);
+  border-radius: 14px;
+  background: var(--danger-light);
+}
+
+.weak-card h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.weak-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.domain-acc {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.acc-ok-text {
+  color: var(--orange);
+}
+
+.case-runner-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.case-material-para {
+  margin: 0 0 10px;
+  color: var(--text-body);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.case-sentence {
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.case-sentence.marked {
+  background: color-mix(in srgb, var(--yellow) 45%, transparent);
+  color: var(--text);
+}
+
+.case-question {
+  margin-top: 12px;
+}
+
+.case-question-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.case-answer {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.case-answer:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+}
+
+.case-sub-label {
+  margin: 12px 0 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.case-my-answer p {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+.case-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.case-points li label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.case-points input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  accent-color: var(--primary);
+}
+
+.case-points span:nth-child(2) {
+  flex: 1;
+}
+
+.case-point-score {
+  flex: 0 0 auto;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.case-reference {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.case-reference summary {
+  color: var(--blue);
+  cursor: pointer;
+}
+
+.case-reference p {
+  margin: 6px 0;
+  line-height: 1.6;
+}
+
+.case-runner-bar {
+  position: sticky;
+  bottom: calc(var(--tabbar-height) + var(--safe-area-bottom));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  font-size: 14px;
+}
+
+.case-runner-bar .action-btn {
+  flex: 0 0 auto;
+}
+
+.outline-prompt p {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.outline-timer {
+  margin: 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.outline-reference {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.case-material,
+.case-question {
+  padding: 14px 16px;
+}
+
+/* 新版本提示 */
+.update-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-height) + var(--safe-area-bottom) + 12px);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(560px, calc(100% - 32px));
+  box-sizing: border-box;
+  padding: 10px 12px 10px 16px;
+  border: 1px solid var(--success-border);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateX(-50%);
+  font-size: 14px;
+}
+
+.update-prompt span {
+  flex: 1;
+  font-weight: 600;
+}
+
+.update-prompt .action-btn {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+}
+
+.update-later {
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.app-version {
+  margin: 20px 0 8px;
+  color: var(--text-light);
+  font-size: 12px;
+  text-align: center;
+}

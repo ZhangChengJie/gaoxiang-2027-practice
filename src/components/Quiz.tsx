@@ -73,7 +73,7 @@ export default function Quiz({
         <span className="quiz-progress">
           第 {index + 1} 题 / 共 {questions.length} 题
         </span>
-        <span className="quiz-chapter">{q.chapter}</span>
+        <span className="quiz-chapter">{q.topic || q.chapter}</span>
       </div>
 
       <div

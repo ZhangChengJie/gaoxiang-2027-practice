@@ -1,5 +1,7 @@
 import { essayContents } from '../data/essayContent'
+import { essayOutlines } from '../data/essayOutlines'
 import TopicDirectory, { type TopicGroup } from '../components/TopicDirectory'
+import OutlinePractice from '../components/OutlinePractice'
 
 const toItem = (e: (typeof essayContents)[number]) => ({ id: e.chapter, title: e.label, subtitle: e.title })
 
@@ -23,6 +25,7 @@ const groups: TopicGroup[] = [
 function EssayDetail({ id }: { id: string }) {
   const essay = essayContents.find((e) => e.chapter === id)
   if (!essay) return null
+  const outline = essayOutlines.find((o) => o.essayId === id)
   return (
     <>
       <div className="essay-section-card essay-section-scope">
@@ -87,6 +90,7 @@ function EssayDetail({ id }: { id: string }) {
           </div>
         </div>
       </div>
+      {outline && <OutlinePractice key={outline.essayId} outline={outline} />}
     </>
   )
 }

@@ -5,7 +5,7 @@ import { loadProgress, saveProgress, STORAGE_KEY } from '../lib/storage'
 import type { Question } from '../lib/types'
 import { useProgress } from './useProgress'
 
-const q: Question = { id: 'a', chapter: 'chapter', text: '题目', options: ['A'], answer: 0, explanation: '解析' }
+const q: Question = { id: 'a', chapter: 'chapter', text: '题目', options: ['A'], answer: 0, explanation: '解析', domain: 'cost', topic: '挣值分析' }
 const now = 1000000000
 function Consumer({ name }: { name: string }) {
   const { progress, update, totalStats } = useProgress()

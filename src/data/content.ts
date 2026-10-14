@@ -1,8 +1,10 @@
 import type { Question } from '../lib/types'
+import { DOMAINS } from './domains'
 
 export type Essay = { chapter: string; title: string; scope: string; points: string[] }
 
 const raws = import.meta.glob('../content/questions/*.md', { eager: true, query: '?raw', import: 'default' }) as Record<string, string>
+const domainKeysByTitle = new Map(DOMAINS.map((domain) => [domain.title, domain.key]))
 const titleMap: Record<string, string> = {
   '01-信息技术与信息化': '信息化发展与新一代信息技术', '02-治理工程与软件': '信息系统治理·工程·安全',
   '03-项目管理主干上半': '整合·范围·进度管理', '04-项目管理主干下半': '成本·质量·资源管理',
@@ -22,7 +24,13 @@ export const chapters = Object.entries(raws).map(([path, raw]) => {
     const options = [...part.matchAll(/^([ABCD])\.\s+(.+)$/gm)].map((m) => m[2])
     const answerLetter = part.match(/\*\*答案：([ABCD])\*\*/)?.[1] ?? 'A'
     const explanation = part.match(/\*\*解析：\*\*\s*(.+)/)?.[1] ?? ''
-    return { id: `${key}-${i + 1}`, chapter: key, text, options, answer: 'ABCD'.indexOf(answerLetter), explanation }
+    const focus = part.match(/^\*\*考点：\*\*[^\S\r\n]*([^/\r\n]+)\s*\/\s*([^\r\n]+)$/m)
+    const domain = domainKeysByTitle.get(focus?.[1].trim() ?? '')
+    const topic = focus?.[2].trim() ?? ''
+    if (!domain || Array.from(topic).length < 2 || Array.from(topic).length > 12) {
+      throw new Error(`${key}-${i + 1}: 考点标签缺失或无效`)
+    }
+    return { id: `${key}-${i + 1}`, chapter: key, domain, topic, text, options, answer: 'ABCD'.indexOf(answerLetter), explanation }
   })
   return { key, title: titleMap[key] ?? key, questions }
 })
@@ -43,7 +51,11 @@ const perfFacts = [
 export const performanceQuestions: Question[] = perfFacts.flatMap(([term, desc], i) => Array.from({ length: 5 }, (_, j) => {
   const choices = [term, ...perfFacts.filter(([x]) => x !== term).slice(j, j + 3).map(([x]) => x)]
   const answer = (i + j) % 4; const opts = [...choices]; [opts[0], opts[answer]] = [opts[answer], opts[0]]
-  return { id: `pd-${i}-${j}`, chapter: 'performance', text: `下列哪项最符合“${desc}”的绩效域？`, options: opts, answer, explanation: `${term}的核心是：${desc}。` }
+  return { id: `pd-${i}-${j}`, chapter: 'performance', domain: 'performance', topic: '绩效域辨析', text: `下列哪项最符合“${desc}”的绩效域？`, options: opts, answer, explanation: `${term}的核心是：${desc}。` }
 }))
 
 export const allQuestions: Question[] = [...chapters.flatMap((c) => c.questions), ...performanceQuestions]
+
+export const questionsByDomain: Record<string, Question[]> = Object.fromEntries(
+  DOMAINS.map(({ key }) => [key, allQuestions.filter((question) => question.domain === key)]),
+)

@@ -1,4 +1,4 @@
-import { MOCK_WEIGHTS } from './mock'
+import { DOMAINS } from '../data/domains'
 import { accuracyOf, dueWrongIds } from './progress'
 import type { Progress, Question } from './types'
 
@@ -14,16 +14,17 @@ export function buildDailyPlan(
     return question ? [question] : []
   }).slice(0, DAILY_REVIEW_COUNT)
   const selected = new Set(review.map((q) => q.id))
-  const eligible = [...byId.values()].filter((q) => Object.hasOwn(MOCK_WEIGHTS, q.chapter))
-  const chapters = new Map<string, Question[]>()
+  const eligibleDomains = new Set(DOMAINS.filter((domain) => domain.mockWeight > 0).map((domain) => domain.key))
+  const eligible = [...byId.values()].filter((q) => eligibleDomains.has(q.domain))
+  const domains = new Map<string, Question[]>()
   for (const question of eligible) {
-    const chapter = chapters.get(question.chapter) ?? []
-    chapter.push(question)
-    chapters.set(question.chapter, chapter)
+    const domain = domains.get(question.domain) ?? []
+    domain.push(question)
+    domains.set(question.domain, domain)
   }
-  const groups = [...chapters.values()].map((questions) => ({
+  const groups = [...domains.values()].map((questions) => ({
     accuracy: accuracyOf(p, questions.map((q) => q.id)).accuracy ?? 0.5,
-    // Randomness only resolves equal chapter accuracies; question numbers stay ordered.
+    // Randomness only resolves equal domain accuracies; question numbers stay ordered.
     tieBreak: rng(),
     questions: questions.filter((q) => !p.answered[q.id] && !selected.has(q.id))
       .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true })),

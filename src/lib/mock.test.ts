@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest'
+import { allQuestions } from '../data/content'
+import { DOMAINS } from '../data/domains'
 import { specialTests } from '../data/specialTests'
 import { emptyProgress } from './progress'
-import { buildMockExam, MOCK_DURATION_SEC, MOCK_TOTAL, MOCK_WEIGHTS, scoreMock } from './mock'
+import { buildMockExam, MOCK_DURATION_SEC, MOCK_TOTAL, scoreMock } from './mock'
 import type { Question } from './types'
 
-function questions(chapter: string, length: number): Question[] {
+function questions(domain: string, length: number, chapter = 'mixed'): Question[] {
   return Array.from({ length }, (_, i) => ({
-    id: `${chapter}-${i + 1}`, chapter, text: '题目', options: ['A', 'B'], answer: i % 2, explanation: '解析',
+    id: `${domain}-${chapter}-${i + 1}`, chapter, domain, topic: '基础概念',
+    text: '题目', options: ['A', 'B'], answer: i % 2, explanation: '解析',
   }))
 }
 function seeded(seed: number): () => number {
@@ -15,86 +18,106 @@ function seeded(seed: number): () => number {
     return seed / 4294967296
   }
 }
-function fullChapters() {
-  return Object.keys(MOCK_WEIGHTS).map((key) => ({ key, questions: questions(key, 20) }))
+function fullBank() {
+  return DOMAINS.flatMap(({ key }) => questions(key, 20))
+}
+function expectDomainOrder(exam: Question[]) {
+  const indices = exam.map((q) => DOMAINS.findIndex((domain) => domain.key === q.domain))
+  expect(indices).toEqual([...indices].sort((a, b) => a - b))
 }
 
 describe('mock:', () => {
   it('权重总计 75，时长为 150 分钟', () => {
-    expect(Object.values(MOCK_WEIGHTS).reduce((sum, value) => sum + value, 0)).toBe(MOCK_TOTAL)
+    expect(DOMAINS.reduce((sum, domain) => sum + domain.mockWeight, 0)).toBe(MOCK_TOTAL)
     expect(MOCK_TOTAL).toBe(75)
     expect(MOCK_DURATION_SEC).toBe(9000)
   })
 
-  it('各章充足时精确按权重抽题，不修改来源且无重复', () => {
-    const chapters = fullChapters()
-    const original = structuredClone(chapters)
-    const exam = buildMockExam(chapters, seeded(42))
+  it('同章混合知识域时精确按域权重抽题，不修改来源且无重复', () => {
+    const bank = fullBank()
+    const original = structuredClone(bank)
+    const exam = buildMockExam(bank, seeded(42))
     expect(exam).toHaveLength(75)
-    for (const [chapter, weight] of Object.entries(MOCK_WEIGHTS)) {
-      expect(exam.filter((q) => q.chapter === chapter)).toHaveLength(weight)
+    for (const { key, mockWeight } of DOMAINS) {
+      expect(exam.filter((q) => q.domain === key), key).toHaveLength(mockWeight)
     }
     expect(new Set(exam.map((q) => q.id)).size).toBe(75)
-    expect(chapters).toEqual(original)
+    expect(bank).toEqual(original)
   })
 
-  it('某章不足时从其它有权重章节随机补齐至 75', () => {
-    const chapters = fullChapters()
-    chapters[0].questions = questions(chapters[0].key, 2)
-    chapters[1].questions = []
-    const exam = buildMockExam(chapters, seeded(10))
+  it('某域不足时从其它正权重域补齐，并保持分组和英文最后', () => {
+    const bank = fullBank().filter((q) => q.domain !== 'it-tech' && q.domain !== 'informatization')
+    bank.push(...questions('informatization', 2))
+    const exam = buildMockExam(bank, seeded(10))
     expect(exam).toHaveLength(75)
-    expect(exam.filter((q) => q.chapter === chapters[0].key)).toHaveLength(2)
-    expect(exam.some((q) => q.chapter === chapters[1].key)).toBe(false)
+    expect(exam.filter((q) => q.domain === 'informatization')).toHaveLength(2)
+    expect(exam.some((q) => q.domain === 'it-tech')).toBe(false)
+    expect(exam.every((q) => DOMAINS.find((domain) => domain.key === q.domain)!.mockWeight > 0)).toBe(true)
     expect(new Set(exam.map((q) => q.id)).size).toBe(75)
+    expectDomainOrder(exam)
+    expect(exam.at(-1)?.domain).toBe('english')
   })
 
-  it('不抽无权重章节，总量不足时返回全部可用题', () => {
-    const key = Object.keys(MOCK_WEIGHTS)[0]
-    const allowed = questions(key, 4)
-    const chapters = [
-      { key, questions: [...allowed, allowed[0]] },
-      ...['09', '09a', '10-记忆与复盘', '11-六周冲刺', 'performance'].map((key) => ({ key, questions: questions(key, 100) })),
+  it('排除零权重、未知域和 09/09a 章，即使论文章误标正权重域；总量不足返回可用题', () => {
+    const allowed = questions('risk', 4)
+    const bank = [
+      ...allowed, allowed[0],
+      ...['advanced', 'method', 'unknown'].flatMap((domain) => questions(domain, 100)),
+      ...['09', '09a', '09-高分论文方法', '09a-论文范文集'].flatMap((chapter) => questions('risk', 100, chapter)),
     ]
-    const exam = buildMockExam(chapters, seeded(10))
+    const exam = buildMockExam(bank, seeded(10))
     expect(exam).toHaveLength(4)
     expect(new Set(exam.map((q) => q.id))).toEqual(new Set(allowed.map((q) => q.id)))
     expect(buildMockExam([], seeded(1))).toEqual([])
   })
 
-  it('按章节字典序分组，英文始终在最后五道', () => {
-    const exam = buildMockExam(fullChapters().reverse(), seeded(99))
-    expect(exam.slice(-5).every((q) => q.chapter === '20-英文术语')).toBe(true)
-    const chapters = exam.map((q) => q.chapter)
-    expect(chapters).toEqual([...chapters].sort())
+  it('按 DOMAINS 展示顺序分组，与章顺序无关，英文为最后五道', () => {
+    const exam = buildMockExam(fullBank().reverse(), seeded(99))
+    expect(exam.slice(-5).every((q) => q.domain === 'english')).toBe(true)
+    expectDomainOrder(exam)
   })
 
-  it('固定 rng 可复现，不同种子改变抽样与章内顺序', () => {
-    expect(buildMockExam(fullChapters(), seeded(1))).toEqual(buildMockExam(fullChapters(), seeded(1)))
-    expect(buildMockExam(fullChapters(), seeded(1))).not.toEqual(buildMockExam(fullChapters(), seeded(2)))
+  it('固定 rng 可复现，不同种子改变抽样与域内顺序', () => {
+    expect(buildMockExam(fullBank(), seeded(1))).toEqual(buildMockExam(fullBank(), seeded(1)))
+    const first = buildMockExam(fullBank(), seeded(1)).filter((q) => q.domain === 'risk')
+    const second = buildMockExam(fullBank(), seeded(2)).filter((q) => q.domain === 'risk')
+    expect(first.map((q) => q.id).sort()).not.toEqual(second.map((q) => q.id).sort())
+    expect(first.map((q) => q.id)).not.toEqual(second.map((q) => q.id))
   })
 
-  it('scoreMock 未作答算错，按 chapter 汇总，不修改输入', () => {
-    const qs = [...questions('a', 3), ...questions('b', 2)]
-    const answers = { 'a-1': 0, 'a-2': 0, 'b-1': 0 }
+  it('实际题库含生成的绩效域题，综合章可入模考且精确按域抽满 75', () => {
+    const exam = buildMockExam(allQuestions, seeded(123))
+    expect(exam).toHaveLength(75)
+    for (const { key, mockWeight } of DOMAINS) {
+      expect(exam.filter((q) => q.domain === key), key).toHaveLength(mockWeight)
+    }
+    expect(exam.some((q) => q.chapter === 'performance')).toBe(true)
+    expect(exam.some((q) => /^(10|11|17)-/.test(q.chapter))).toBe(true)
+    expectDomainOrder(exam)
+  })
+
+  it('scoreMock 未作答算错，兼容字段 byChapter 按 domain 汇总，不修改输入', () => {
+    const qs = [...questions('risk', 2, 'a'), ...questions('risk', 1, 'b'), ...questions('cost', 2, 'a')]
+    const answers = { 'risk-a-1': 0, 'risk-a-2': 0, 'cost-a-1': 0 }
     expect(scoreMock(qs, answers, 900, 123)).toEqual({
       at: 123, total: 5, correct: 2, durationSec: 900,
-      byChapter: { a: { total: 3, correct: 1 }, b: { total: 2, correct: 1 } },
+      byChapter: { risk: { total: 3, correct: 1 }, cost: { total: 2, correct: 1 } },
     })
-    expect(answers).toEqual({ 'a-1': 0, 'a-2': 0, 'b-1': 0 })
+    expect(answers).toEqual({ 'risk-a-1': 0, 'risk-a-2': 0, 'cost-a-1': 0 })
     expect(scoreMock([], {}, 0, 123)).toEqual({ at: 123, total: 0, correct: 0, durationSec: 0, byChapter: {} })
   })
 
-  it('专项使用传入的错题本排序，并通过模考抽题逻辑排除无权重题', () => {
+  it('专项使用传入的错题本排序，mock 专项直接使用题数组和域权重', () => {
     const p = emptyProgress()
-    const qs = questions('a', 40)
+    const qs = questions('risk', 40)
     for (const [index, q] of qs.entries()) {
       p.wrong[q.id] = { id: q.id, wrongCount: index, lastWrongTime: 0, reviewStage: 0, nextReviewAt: 0 }
     }
     const errors = specialTests.find((t) => t.key === 'errors')!
     expect(errors.filter(qs, p).map((q) => q.id)).toEqual(qs.slice(10).reverse().map((q) => q.id))
     const mock = specialTests.find((t) => t.key === 'mock')!
-    expect(mock.filter(questions('performance', 100), p)).toEqual([])
+    expect(mock.filter(questions('method', 100), p)).toEqual([])
+    expect(mock.filter(questions('performance', 100, 'performance'), p)).toHaveLength(75)
     expect(mock.description).toBe('按真题分布抽 75 题')
     expect(specialTests.find((t) => t.key === 'performance')!.description).toContain('40 题')
   })

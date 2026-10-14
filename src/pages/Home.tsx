@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { chapters } from '../data/content'
 import { useProgress } from '../hooks/useProgress'
 import { getChapterMeta } from '../lib/chapterMeta'
-import { accuracyOf, todayStat } from '../lib/progress'
+import { accuracyOf, todayStat, weakestDomains } from '../lib/progress'
+import { allQuestions } from '../data/content'
 import ProgressRing from '../components/ProgressRing'
 import { ThemeToggle } from '../components/ThemeToggle'
 import DataBackup from '../components/DataBackup'
@@ -20,6 +21,7 @@ export default function Home() {
   const { progress, chapterProgress, totalStats } = useProgress()
   const overall = chapterProgress(allChapterQuestions)
   const today = todayStat(progress, Date.now())
+  const weak = weakestDomains(progress, allQuestions)
   const todayAcc = today.answered > 0 ? Math.round((today.correct / today.answered) * 100) : null
 
   return (
@@ -73,6 +75,19 @@ export default function Home() {
         <span aria-hidden="true">›</span>
       </button>
 
+      {weak.length > 0 && (
+        <section className="weak-card" aria-labelledby="weak-title">
+          <h2 id="weak-title">薄弱知识域</h2>
+          <div className="weak-list">
+            {weak.map((w) => (
+              <button key={w.domain} type="button" className="chip" onClick={() => navigate(`/domain/${w.domain}`)}>
+                {w.title} {Math.round((w.accuracy ?? 0) * 100)}%
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="home-section" aria-labelledby="chapter-grid-title">
         <h2 className="section-title" id="chapter-grid-title">章节学习 <small className="section-hint">正确率 {'<'}60% 红 · 60–70% 橙 · ≥70% 绿</small></h2>
         <div className="chapter-grid">
@@ -105,6 +120,8 @@ export default function Home() {
       </section>
 
       <DataBackup />
+
+      <p className="app-version">版本 {__APP_VERSION__}</p>
     </div>
   )
 }

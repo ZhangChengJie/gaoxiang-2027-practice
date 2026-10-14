@@ -1,4 +1,5 @@
-import type { DailyStat, ErrorCause, MockResult, Progress, WrongRecord } from './types'
+import { DOMAINS, ESSAY_DOMAIN } from '../data/domains'
+import type { DailyStat, ErrorCause, MockResult, Progress, Question, WrongRecord } from './types'
 
 export const ERROR_CAUSE_LABELS: Record<ErrorCause, string> = {
   unknown: '不会', hesitant: '犹豫', careless: '粗心', slow: '会但慢',
@@ -100,4 +101,22 @@ export function todayStat(p: Progress, now: number): DailyStat {
 
 export function recordMock(p: Progress, result: MockResult): Progress {
   return { ...p, mockHistory: [...p.mockHistory, result].slice(-20) }
+}
+
+export function domainAccuracy(p: Progress, questions: Question[]): {
+  domain: string; title: string; total: number; attempted: number; attempts: number; correct: number; accuracy: number | null
+}[] {
+  return DOMAINS.map(({ key, title }) => {
+    const ids = [...new Set(questions.filter((question) => question.domain === key).map((question) => question.id))]
+    return { domain: key, title, total: ids.length, ...accuracyOf(p, ids) }
+  })
+}
+
+export function weakestDomains(
+  p: Progress, questions: Question[], n = 3, minAttempts = 5,
+): ReturnType<typeof domainAccuracy> {
+  return domainAccuracy(p, questions)
+    .filter((row) => row.domain !== ESSAY_DOMAIN && row.attempts >= minAttempts && row.accuracy !== null)
+    .sort((a, b) => a.accuracy! - b.accuracy!)
+    .slice(0, Math.max(0, n))
 }

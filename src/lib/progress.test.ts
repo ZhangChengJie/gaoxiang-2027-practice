@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
-  accuracyOf, applyAnswer, clearAllWrong, dueWrongIds, emptyProgress, ERROR_CAUSE_LABELS,
-  isDue, localDateKey, recordMock, removeWrong, REVIEW_INTERVALS_DAYS, setWrongCause, todayStat,
+  accuracyOf, applyAnswer, clearAllWrong, domainAccuracy, dueWrongIds, emptyProgress, ERROR_CAUSE_LABELS,
+  isDue, localDateKey, recordMock, removeWrong, REVIEW_INTERVALS_DAYS, setWrongCause, todayStat, weakestDomains,
 } from './progress'
-import type { MockResult } from './types'
+import type { MockResult, Question } from './types'
+import { DOMAINS } from '../data/domains'
 
 const now = new Date(2026, 9, 14, 12).getTime()
 const day = 86400000
@@ -130,5 +131,67 @@ describe('progress:', () => {
     recordMock(p, result)
     expect(p).toEqual(original)
     expect(emptyProgress()).not.toBe(emptyProgress())
+  })
+})
+
+function domainQuestion(id: string, domain: string, chapter = 'mixed'): Question {
+  return { id, chapter, domain, topic: '基础概念', text: '题目', options: ['A'], answer: 0, explanation: '解析' }
+}
+
+describe('progress: 知识域统计', () => {
+  it('每个 DOMAINS 按顺序返回，空题域 total=0、accuracy=null', () => {
+    const rows = domainAccuracy(emptyProgress(), [])
+    expect(rows).toEqual(DOMAINS.map(({ key, title }) => ({
+      domain: key, title, total: 0, attempted: 0, attempts: 0, correct: 0, accuracy: null,
+    })))
+  })
+
+  it('同域跨章累计作答次数，去重题目，旧标记计 attempted 但不推测正确率', () => {
+    const questions = [domainQuestion('a', 'risk', 'chapter-a'), domainQuestion('b', 'risk', 'chapter-b'),
+      domainQuestion('legacy', 'risk'), domainQuestion('c', 'cost')]
+    let p = applyAnswer(emptyProgress(), 'a', false, now)
+    p = applyAnswer(p, 'a', true, now)
+    p = applyAnswer(p, 'b', true, now)
+    p.answered.legacy = true
+    p.answered.c = true
+    p = applyAnswer(p, 'orphan', false, now)
+    const original = structuredClone(p)
+    const rows = domainAccuracy(p, [...questions, questions[0]])
+    expect(rows.find((row) => row.domain === 'risk')).toEqual({
+      domain: 'risk', title: '项目风险管理', total: 3, attempted: 3, attempts: 3, correct: 2, accuracy: 2 / 3,
+    })
+    expect(rows.find((row) => row.domain === 'cost')).toMatchObject({ total: 1, attempted: 1, attempts: 0, accuracy: null })
+    expect(p).toEqual(original)
+  })
+
+  it('保留有 stats 但无 answered 标记的累计口径', () => {
+    const p = applyAnswer(emptyProgress(), 'a', false, now)
+    delete p.answered.a
+    expect(domainAccuracy(p, [domainQuestion('a', 'risk')]).find((row) => row.domain === 'risk'))
+      .toMatchObject({ attempted: 1, attempts: 1, correct: 0, accuracy: 0 })
+  })
+
+  it('薄弱域按累计次数达门槛后升序取 n，排除方法域，保留英文及零权重高级域', () => {
+    const questions = ['risk', 'english', 'method', 'cost', 'quality', 'advanced', 'scope']
+      .map((domain) => domainQuestion(domain, domain))
+    let p = emptyProgress()
+    const outcomes: Record<string, boolean[]> = {
+      risk: [false, false, false, false, true],
+      english: [false, false, false, false, false],
+      method: [false, false, false, false, false],
+      cost: [false, false, true, true, true],
+      quality: [false, false, false, false],
+      advanced: [false, false, true, true, true],
+    }
+    for (const [id, answers] of Object.entries(outcomes)) {
+      for (const right of answers) p = applyAnswer(p, id, right, now)
+    }
+    p.answered.scope = true
+    expect(weakestDomains(p, questions).map((row) => row.domain)).toEqual(['english', 'risk', 'cost'])
+    expect(weakestDomains(p, questions, 10).map((row) => row.domain)).toEqual(['english', 'risk', 'cost', 'advanced'])
+    expect(weakestDomains(p, questions, 1, 4).map((row) => row.domain)).toEqual(['quality'])
+    expect(weakestDomains(p, questions, 0)).toEqual([])
+    expect(weakestDomains(p, questions, -1)).toEqual([])
+    expect(weakestDomains(p, questions, 10, 0).some((row) => row.domain === 'scope')).toBe(false)
   })
 })

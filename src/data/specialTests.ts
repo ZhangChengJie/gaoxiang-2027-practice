@@ -60,15 +60,7 @@ export const specialTests: SpecialTest[] = [
     title: '综合模考',
     description: '按真题分布抽 75 题',
     icon: '📝',
-    filter: (questions) => {
-      const grouped = new Map<string, Question[]>()
-      for (const question of questions) {
-        const chapter = grouped.get(question.chapter) ?? []
-        chapter.push(question)
-        grouped.set(question.chapter, chapter)
-      }
-      return buildMockExam([...grouped].map(([key, questions]) => ({ key, questions })))
-    },
+    filter: (questions) => buildMockExam(questions),
   },
   {
     key: 'sprint',

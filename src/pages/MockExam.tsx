@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { allQuestions, chapters } from '../data/content'
+import { allQuestions } from '../data/content'
 import { useProgress } from '../hooks/useProgress'
 import { buildMockExam, scoreMock, MOCK_DURATION_SEC, MOCK_TOTAL } from '../lib/mock'
 import { getChapterMeta } from '../lib/chapterMeta'
+import { DOMAINS, domainTitle } from '../data/domains'
+
+// 新成绩按知识域汇总；旧成绩按章节汇总，两种键都能显示
+const groupLabel = (key: string) => (DOMAINS.some((d) => d.key === key) ? domainTitle(key) : getChapterMeta(key).short)
 import type { MockResult, Question } from '../lib/types'
 import BackButton from '../components/BackButton'
 import QuestionCard from '../components/QuestionCard'
@@ -52,7 +56,7 @@ export default function MockExam() {
   }
 
   const start = () => {
-    const qs = buildMockExam(chapters)
+    const qs = buildMockExam(allQuestions)
     setIndex(0)
     persist({ ids: qs.map((q) => q.id), answers: {}, startedAt: Date.now() })
   }
@@ -138,11 +142,11 @@ export default function MockExam() {
             </div>
           </div>
           <section className="home-section" aria-labelledby="mock-chapter-title">
-            <h2 className="section-title" id="mock-chapter-title">分章得分（从弱到强）</h2>
+            <h2 className="section-title" id="mock-chapter-title">分知识域得分（从弱到强）</h2>
             <ul className="mock-history">
               {rows.map(([key, v]) => (
                 <li key={key}>
-                  <span>{getChapterMeta(key).short}</span>
+                  <span>{groupLabel(key)}</span>
                   <span className={v.correct / v.total >= 0.6 ? 'mock-pass' : 'mock-fail'}>
                     {v.correct}/{v.total}
                   </span>

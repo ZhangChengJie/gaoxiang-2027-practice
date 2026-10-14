@@ -1,15 +1,20 @@
 import { useRef, useState } from 'react'
 import { useProgress } from '../hooks/useProgress'
 import { exportProgress, importProgress } from '../lib/storage'
+import { usePractice } from '../hooks/usePractice'
+import { normalizePractice } from '../lib/practiceStore'
 
 export default function DataBackup() {
   const { progress, replaceProgress } = useProgress()
+  const { records, setRecords } = usePractice()
   const fileInput = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState('')
 
   const handleExport = () => {
     const now = Date.now()
-    const blob = new Blob([exportProgress(progress, now)], { type: 'application/json' })
+    // 案例/提纲练习记录随进度一起导出
+    const payload = { ...JSON.parse(exportProgress(progress, now)), practice: records }
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -21,10 +26,13 @@ export default function DataBackup() {
 
   const handleImport = async (file: File) => {
     try {
-      const next = importProgress(await file.text(), Date.now())
+      const text = await file.text()
+      const next = importProgress(text, Date.now())
+      const practice = (JSON.parse(text) as { practice?: unknown }).practice
       const count = Object.keys(next.answered).length
       if (!window.confirm(`导入后会覆盖本机进度（文件中已答 ${count} 题、错题 ${Object.keys(next.wrong).length} 题），确定？`)) return
       replaceProgress(next)
+      if (practice !== undefined) setRecords(normalizePractice(practice))
       setMessage(`已导入：已答 ${count} 题。`)
     } catch (e) {
       setMessage(`导入失败：${e instanceof Error ? e.message : '无法读取文件'}`)

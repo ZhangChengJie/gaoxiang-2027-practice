@@ -1,6 +1,8 @@
 export type Question = {
   id: string
   chapter: string
+  domain: string
+  topic: string
   text: string
   options: string[]
   answer: number

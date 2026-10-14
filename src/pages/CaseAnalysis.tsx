@@ -1,7 +1,11 @@
 import { caseCategories, caseContents } from '../data/caseAnalysis'
+import { casePractices } from '../data/casePractice'
 import TopicDirectory, { type TopicGroup } from '../components/TopicDirectory'
+import CasePracticeRunner from '../components/CasePracticeRunner'
+import { usePractice } from '../hooks/usePractice'
+import { bestCaseScore } from '../lib/practiceStore'
 
-const groups: TopicGroup[] = caseCategories.map((cat) => ({
+const knowledgeGroups: TopicGroup[] = caseCategories.map((cat) => ({
   key: cat.id,
   title: cat.title,
   icon: cat.icon,
@@ -11,6 +15,8 @@ const groups: TopicGroup[] = caseCategories.map((cat) => ({
 }))
 
 function CaseDetail({ id }: { id: string }) {
+  const practice = casePractices.find((c) => c.id === id)
+  if (practice) return <CasePracticeRunner key={practice.id} practice={practice} />
   const content = caseContents.find((c) => c.id === id)
   if (!content) return null
   return (
@@ -45,10 +51,26 @@ function CaseDetail({ id }: { id: string }) {
 }
 
 export default function CaseAnalysis() {
+  const { records } = usePractice()
+  const practiceGroup: TopicGroup = {
+    key: 'practice',
+    title: '实战练习',
+    icon: '🏋️',
+    hint: '每套 25 分',
+    items: casePractices.map((c) => {
+      const best = bestCaseScore(records, c.id)
+      return {
+        id: c.id,
+        title: c.title,
+        subtitle: `${c.questions.length} 问 · 建议 ${c.minutes} 分钟${best === null ? '' : ` · 最好 ${best}/25`}`,
+      }
+    }),
+  }
+  const groups = [practiceGroup, ...knowledgeGroups]
   return (
     <TopicDirectory
       title="案例分析"
-      description="题型分类 · 答题技巧 · 高频考点 · 答题模板"
+      description="实战练习 + 题型 · 技巧 · 考点 · 模板"
       groups={groups}
       storageKey="gaoxiang-2027-case-read"
       renderDetail={(id) => <CaseDetail id={id} />}

@@ -3,11 +3,19 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
+const buildTime = new Date()
+const pad = (n: number) => String(n).padStart(2, '0')
+const appVersion = `${buildTime.getFullYear()}.${pad(buildTime.getMonth() + 1)}.${pad(buildTime.getDate())}-${pad(buildTime.getHours())}${pad(buildTime.getMinutes())}`
+
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(appVersion) },
   plugins: [
     react(),
     VitePWA({
+      // 新版本下载后立即接管（skipWaiting + clientsClaim），由 UpdatePrompt 提示用户点击刷新；
+      // 注册放在应用代码里，以便主动检查更新
       registerType: 'autoUpdate',
+      injectRegister: false,
       includeAssets: ['favicon.svg'],
       manifest: {
         name: '高项二轮练习 · 2027',
@@ -28,6 +36,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https?:\/\/.*/i,
