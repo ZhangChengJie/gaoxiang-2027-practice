@@ -1286,23 +1286,6 @@ button:focus-visible {
   list-style: none;
 }
 
-.case-empty {
-  text-align: center;
-  color: var(--text-secondary);
-  padding: 40px 0;
-  font-size: 14px;
-}
-
-@media (max-width: 420px) {
-  .case-category-tab {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  .case-category-icon {
-    font-size: 16px;
-  }
-}
-
 /* ========================================
    Page Transitions & Animations
    ======================================== */
