@@ -1,60 +1,40 @@
-import { useState, useRef, useEffect } from 'react'
 import { essayContents } from '../data/essayContent'
+import TopicDirectory, { type TopicGroup } from '../components/TopicDirectory'
 
-export default function Essay() {
-  const [activeChapter, setActiveChapter] = useState(essayContents[0]?.chapter ?? '')
-  const scrollRef = useRef<HTMLDivElement>(null)
+const toItem = (e: (typeof essayContents)[number]) => ({ id: e.chapter, title: e.label, subtitle: e.title })
 
-  const currentEssay = essayContents.find((e) => e.chapter === activeChapter) ?? essayContents[0]
+const groups: TopicGroup[] = [
+  { key: 'intro', title: '写作总论', icon: '✍️', items: essayContents.filter((e) => e.chapter === 'intro').map(toItem) },
+  {
+    key: 'domains',
+    title: '8 大绩效域',
+    icon: '📊',
+    hint: '近年命题重心',
+    items: essayContents.filter((e) => e.chapter.startsWith('pd-')).map(toItem),
+  },
+  {
+    key: 'areas',
+    title: '十大管理领域',
+    icon: '🧩',
+    items: essayContents.filter((e) => e.chapter !== 'intro' && !e.chapter.startsWith('pd-')).map(toItem),
+  },
+]
 
-  useEffect(() => {
-    const el = scrollRef.current?.querySelector(`[data-key="${activeChapter}"]`) as HTMLElement
-    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-  }, [activeChapter])
-
-  if (!currentEssay) {
-    return (
-      <div className="page essay-page">
-        <div className="page-header">
-          <h1>论文写作知识点</h1>
-          <p>按真实命题主题（绩效域 + 十大管理领域）组织</p>
-        </div>
-      </div>
-    )
-  }
-
+function EssayDetail({ id }: { id: string }) {
+  const essay = essayContents.find((e) => e.chapter === id)
+  if (!essay) return null
   return (
-    <div className="page essay-page">
-      <div className="page-header">
-        <h1>论文写作知识点</h1>
-        <p>按真实命题主题：写作总论 · 8 大绩效域 · 十大管理领域</p>
-      </div>
-
-      <div className="essay-chips-wrapper" ref={scrollRef}>
-        <div className="essay-chips-scroll">
-          {essayContents.map((e) => (
-            <button
-              key={e.chapter}
-              data-key={e.chapter}
-              className={`chip ${activeChapter === e.chapter ? 'active' : ''}`}
-              onClick={() => setActiveChapter(e.chapter)}
-            >
-              {e.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
+    <>
       <div className="essay-section-card essay-section-scope">
         <div className="essay-section-header">
           <span className="essay-section-icon">📋</span>
           <div>
             <h3 className="essay-section-title">论文主题</h3>
-            <p className="essay-section-subtitle">{currentEssay.title}</p>
+            <p className="essay-section-subtitle">{essay.title}</p>
           </div>
         </div>
         <div className="essay-section-body">
-          <p className="essay-scope-text">{currentEssay.scope}</p>
+          <p className="essay-scope-text">{essay.scope}</p>
         </div>
       </div>
 
@@ -63,12 +43,12 @@ export default function Essay() {
           <span className="essay-section-icon">🎯</span>
           <div>
             <h3 className="essay-section-title">关键知识点</h3>
-            <p className="essay-section-subtitle">{currentEssay.points.length} 个论文写作要点</p>
+            <p className="essay-section-subtitle">{essay.points.length} 个论文写作要点</p>
           </div>
         </div>
         <div className="essay-section-body">
           <ul className="essay-points-list">
-            {currentEssay.points.map((p, i) => (
+            {essay.points.map((p, i) => (
               <li key={i}>
                 <span className="essay-point-num">{i + 1}</span>
                 <span>{p}</span>
@@ -87,7 +67,7 @@ export default function Essay() {
           </div>
         </div>
         <div className="essay-section-body">
-          <p className="essay-practice-text">{currentEssay.practice}</p>
+          <p className="essay-practice-text">{essay.practice}</p>
         </div>
       </div>
 
@@ -101,12 +81,24 @@ export default function Essay() {
         </div>
         <div className="essay-section-body">
           <div className="essay-keywords-cloud">
-            {currentEssay.keywords.map((kw) => (
+            {essay.keywords.map((kw) => (
               <span key={kw} className="keyword-tag">{kw}</span>
             ))}
           </div>
         </div>
       </div>
-    </div>
+    </>
+  )
+}
+
+export default function Essay() {
+  return (
+    <TopicDirectory
+      title="论文写作知识点"
+      description="按真实命题主题组织"
+      groups={groups}
+      storageKey="gaoxiang-2027-essay-read"
+      renderDetail={(id) => <EssayDetail id={id} />}
+    />
   )
 }

@@ -1,70 +1,57 @@
-import { useState } from 'react'
 import { caseCategories, caseContents } from '../data/caseAnalysis'
+import TopicDirectory, { type TopicGroup } from '../components/TopicDirectory'
 
-export default function CaseAnalysis() {
-  const [activeCategory, setActiveCategory] = useState(caseCategories[0]?.id ?? '')
+const groups: TopicGroup[] = caseCategories.map((cat) => ({
+  key: cat.id,
+  title: cat.title,
+  icon: cat.icon,
+  items: caseContents
+    .filter((c) => c.categoryId === cat.id)
+    .map((c) => ({ id: c.id, title: c.title, subtitle: c.description })),
+}))
 
-  const filtered = caseContents.filter((c) => c.categoryId === activeCategory)
-
+function CaseDetail({ id }: { id: string }) {
+  const content = caseContents.find((c) => c.id === id)
+  if (!content) return null
   return (
-    <div className="page case-page">
-      <div className="page-header">
-        <h1>案例分析</h1>
-        <p>题型分类 · 答题技巧 · 高频考点 · 答题模板</p>
+    <div className="case-card">
+      <div className="case-card-header">
+        <p className="case-card-desc">{content.description}</p>
       </div>
 
-      <div className="case-category-tabs">
-        {caseCategories.map((cat) => (
-          <button
-            key={cat.id}
-            className={`case-category-tab ${activeCategory === cat.id ? 'active' : ''}`}
-            onClick={() => setActiveCategory(cat.id)}
-          >
-            <span className="case-category-icon">{cat.icon}</span>
-            <span className="case-category-label">{cat.title}</span>
-          </button>
+      <div className="case-card-body">
+        {content.sections.map((section, si) => (
+          <div key={si} className="case-section">
+            <h4 className="case-section-title">
+              <span className="case-section-dot" />
+              {section.title}
+            </h4>
+            <ul className="case-list">
+              {section.content.map((item, ii) =>
+                item === '' ? (
+                  <li key={ii} className="case-list-spacer" />
+                ) : (
+                  <li key={ii} className="case-list-item">
+                    {item}
+                  </li>
+                ),
+              )}
+            </ul>
+          </div>
         ))}
       </div>
-
-      <div className="case-content">
-        {filtered.length === 0 ? (
-          <div className="case-empty">
-            <p>暂无内容</p>
-          </div>
-        ) : (
-          filtered.map((content) => (
-            <div key={content.id} className="case-card">
-              <div className="case-card-header">
-                <h3 className="case-card-title">{content.title}</h3>
-                <p className="case-card-desc">{content.description}</p>
-              </div>
-
-              <div className="case-card-body">
-                {content.sections.map((section, si) => (
-                  <div key={si} className="case-section">
-                    <h4 className="case-section-title">
-                      <span className="case-section-dot" />
-                      {section.title}
-                    </h4>
-                    <ul className="case-list">
-                      {section.content.map((item, ii) => {
-                        if (item === '') {
-                          return <li key={ii} className="case-list-spacer" />
-                        }
-                        return (
-                          <li key={ii} className="case-list-item">
-                            {item}
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
     </div>
+  )
+}
+
+export default function CaseAnalysis() {
+  return (
+    <TopicDirectory
+      title="案例分析"
+      description="题型分类 · 答题技巧 · 高频考点 · 答题模板"
+      groups={groups}
+      storageKey="gaoxiang-2027-case-read"
+      renderDetail={(id) => <CaseDetail id={id} />}
+    />
   )
 }

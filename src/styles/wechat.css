@@ -941,29 +941,9 @@ button:focus-visible {
 /* ========================================
    Essay Page
    ======================================== */
-.essay-chapter-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
-.essay-chips-wrapper {
-  margin: 0 -16px 16px;
-  padding: 0 16px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
 
-.essay-chips-wrapper::-webkit-scrollbar {
-  display: none;
-}
 
-.essay-chips-scroll {
-  display: flex;
-  gap: 8px;
-  padding: 4px 0;
-}
 
 .chip {
   flex-shrink: 0;
@@ -1204,49 +1184,11 @@ button:focus-visible {
 /* ========================================
    Case Analysis Page
    ======================================== */
-.case-category-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 4px;
-}
 
-.case-category-tabs::-webkit-scrollbar {
-  display: none;
-}
 
-.case-category-tab {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 12px;
-  background: var(--card);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: var(--shadow-card);
-}
 
-.case-category-tab.active {
-  background: var(--primary);
-  color: var(--on-primary);
-}
 
-.case-category-icon {
-  font-size: 18px;
-}
 
-.case-category-label {
-  white-space: nowrap;
-  font-size: 14px;
-}
 
 .case-content {
   display: flex;
@@ -1672,4 +1614,161 @@ button:focus-visible {
 .wrong-review-meta {
   color: var(--text-secondary);
   font-size: 12px;
+}
+
+/* ========================================
+   目录 → 详情（论文 / 案例）
+   ======================================== */
+.topic-group {
+  margin-bottom: 20px;
+}
+
+.topic-group-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 8px 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.topic-group-title small {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.topic-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.topic-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.topic-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.topic-row:active {
+  background: var(--surface-active);
+}
+
+.topic-num {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.topic-num.read {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.topic-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topic-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.topic-subtitle {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.topic-chevron {
+  color: var(--text-light);
+  font-size: 20px;
+}
+
+.topic-detail-head {
+  margin: 4px 0 16px;
+}
+
+.topic-eyebrow {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.topic-detail-head h1 {
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+
+.topic-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.topic-pager-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.topic-pager-btn.next {
+  text-align: right;
+}
+
+.topic-pager-btn:active {
+  background: var(--surface-active);
+}
+
+.topic-pager-dir {
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.topic-pager-title {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
