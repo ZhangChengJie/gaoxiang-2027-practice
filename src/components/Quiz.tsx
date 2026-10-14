@@ -1,6 +1,11 @@
-import { useState, useCallback } from 'react'
-import type { Question } from '../lib/types'
+import { useState, useCallback, useRef } from 'react'
+import type { ErrorCause, Question } from '../lib/types'
+import { ERROR_CAUSE_LABELS } from '../lib/progress'
+import { useProgress } from '../hooks/useProgress'
 import QuestionCard from './QuestionCard'
+import SessionSummary from './SessionSummary'
+
+const CAUSES = Object.keys(ERROR_CAUSE_LABELS) as ErrorCause[]
 
 export default function Quiz({
   questions,
@@ -9,41 +14,58 @@ export default function Quiz({
   questions: Question[]
   onAnswer: (q: Question, right: boolean) => void
 }) {
+  const { progress, setCause } = useProgress()
   const [index, setIndex] = useState(0)
-  const [selected, setSelected] = useState<number | null>(null)
-  const [showResult, setShowResult] = useState(false)
+  // 本轮作答：题目下标 → 所选选项；回看时保留结果，不重复计数
+  const [answers, setAnswers] = useState<Record<number, number>>({})
+  const [finished, setFinished] = useState(false)
+  const startedAt = useRef(Date.now())
+  const [elapsedSec, setElapsedSec] = useState(0)
 
   const q = questions[index]
+  const selected = answers[index] ?? null
+  const showResult = selected !== null
+  const answeredCount = Object.keys(answers).length
 
   const handleSelect = useCallback(
     (i: number) => {
-      if (showResult || !q) return
-      setSelected(i)
-      setShowResult(true)
+      if (!q || answers[index] !== undefined) return
+      setAnswers((prev) => ({ ...prev, [index]: i }))
       onAnswer(q, i === q.answer)
     },
-    [showResult, q, onAnswer],
+    [q, index, answers, onAnswer],
   )
 
-  const handleNext = useCallback(() => {
-    if (index < questions.length - 1) {
-      setIndex((i) => i + 1)
-      setSelected(null)
-      setShowResult(false)
-    }
-  }, [index, questions.length])
+  const finish = () => {
+    setElapsedSec(Math.round((Date.now() - startedAt.current) / 1000))
+    setFinished(true)
+  }
 
-  const handlePrev = useCallback(() => {
-    if (index > 0) {
-      setIndex((i) => i - 1)
-      setSelected(null)
-      setShowResult(false)
-    }
-  }, [index])
+  const restart = () => {
+    setAnswers({})
+    setIndex(0)
+    setFinished(false)
+    startedAt.current = Date.now()
+  }
 
   if (!q || questions.length === 0) {
     return <div className="empty-state">暂无题目</div>
   }
+
+  if (finished) {
+    return (
+      <SessionSummary
+        questions={questions}
+        answers={answers}
+        elapsedSec={elapsedSec}
+        onRestart={restart}
+        onBack={() => setFinished(false)}
+      />
+    )
+  }
+
+  const isLast = index === questions.length - 1
+  const wrongRecord = progress.wrong[q.id]
 
   return (
     <div className="quiz-container">
@@ -68,43 +90,64 @@ export default function Quiz({
 
       <QuestionCard question={q} selected={selected} onSelect={handleSelect} showResult={showResult} />
 
-      {showResult && (
-        <div className="quiz-nav-buttons">
-          <button className="quiz-nav-btn" onClick={handlePrev} disabled={index === 0}>
-            ← 上一题
-          </button>
-          {index < questions.length - 1 ? (
-            <button className="quiz-nav-btn primary" onClick={handleNext}>
-              下一题 →
+      {showResult && selected !== q.answer && wrongRecord && (
+        <div className="cause-picker" role="group" aria-label="标记错因">
+          <span className="cause-picker-label">错因</span>
+          {CAUSES.map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`chip ${wrongRecord.cause === c ? 'active' : ''}`}
+              aria-pressed={wrongRecord.cause === c}
+              onClick={() => setCause(q.id, c)}
+            >
+              {ERROR_CAUSE_LABELS[c]}
             </button>
-          ) : (
-            <button className="quiz-nav-btn primary" onClick={() => {
-              setIndex(0)
-              setSelected(null)
-              setShowResult(false)
-            }}>
-              重新开始
-            </button>
-          )}
+          ))}
         </div>
       )}
 
-      {questions.length <= 20 && (
+      <div className="quiz-nav-buttons">
+        <button
+          className="quiz-nav-btn"
+          onClick={() => setIndex((i) => i - 1)}
+          disabled={index === 0}
+        >
+          ← 上一题
+        </button>
+        {isLast ? (
+          <button className="quiz-nav-btn primary" onClick={finish} disabled={answeredCount === 0}>
+            查看小结
+          </button>
+        ) : (
+          <button className="quiz-nav-btn primary" onClick={() => setIndex((i) => i + 1)}>
+            {showResult ? '下一题 →' : '跳过 →'}
+          </button>
+        )}
+      </div>
+
+      {!isLast && answeredCount > 0 && (
+        <button type="button" className="quiz-finish-link" onClick={finish}>
+          结束本轮，查看小结（已答 {answeredCount} 题）
+        </button>
+      )}
+
+      {questions.length <= 30 && (
         <div className="quiz-dots" aria-label="跳转题目">
-          {questions.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              className={`quiz-dot ${i === index ? 'active' : ''} ${i < index ? 'done' : ''}`}
-              aria-label={`跳转到第 ${i + 1} 题`}
-              aria-current={i === index ? 'step' : undefined}
-              onClick={() => {
-                setIndex(i)
-                setSelected(null)
-                setShowResult(false)
-              }}
-            />
-          ))}
+          {questions.map((item, i) => {
+            const a = answers[i]
+            const state = a === undefined ? '' : a === item.answer ? 'right' : 'miss'
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={`quiz-dot ${i === index ? 'active' : ''} ${state}`}
+                aria-label={`跳转到第 ${i + 1} 题`}
+                aria-current={i === index ? 'step' : undefined}
+                onClick={() => setIndex(i)}
+              />
+            )
+          })}
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import type { Question, SpecialTest } from '../lib/types'
+import { buildMockExam } from '../lib/mock'
 
 export const specialTests: SpecialTest[] = [
   {
@@ -49,31 +50,24 @@ export const specialTests: SpecialTest[] = [
     title: '易错考点',
     description: '从错题本提取高频错误题目',
     icon: '⚠️',
-    filter: (_questions: Question[]) => {
-      // 动态加载错题数据
-      try {
-        const saved = JSON.parse(localStorage.getItem('gaoxiang-2027-progress-v1') ?? '{}')
-        const wrong = saved.wrong ?? {}
-        const wrongIds = Object.keys(wrong)
-          .filter((id) => wrong[id].wrongCount >= 2)
-          .sort((a, b) => wrong[b].wrongCount - wrong[a].wrongCount)
-        return wrongIds
-          .map((id) => _questions.find((q) => q.id === id))
-          .filter((q): q is Question => q !== undefined)
-          .slice(0, 30)
-      } catch {
-        return []
-      }
-    },
+    filter: (questions, progress) => questions
+      .filter((q) => (progress.wrong[q.id]?.wrongCount ?? 0) >= 2)
+      .sort((a, b) => progress.wrong[b.id].wrongCount - progress.wrong[a.id].wrongCount)
+      .slice(0, 30),
   },
   {
     key: 'mock',
     title: '综合模考',
-    description: '随机 75 题综合模拟考试',
+    description: '按真题分布抽 75 题',
     icon: '📝',
-    filter: (questions: Question[]) => {
-      const shuffled = [...questions].sort(() => Math.random() - 0.5)
-      return shuffled.slice(0, Math.min(75, shuffled.length))
+    filter: (questions) => {
+      const grouped = new Map<string, Question[]>()
+      for (const question of questions) {
+        const chapter = grouped.get(question.chapter) ?? []
+        chapter.push(question)
+        grouped.set(question.chapter, chapter)
+      }
+      return buildMockExam([...grouped].map(([key, questions]) => ({ key, questions })))
     },
   },
   {

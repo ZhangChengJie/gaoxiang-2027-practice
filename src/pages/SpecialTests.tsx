@@ -13,7 +13,7 @@ export default function SpecialTests() {
 
       <div className="specials-grid">
         {specialTests.map((test) => (
-          <button key={test.key} className="special-card" onClick={() => navigate(`/test/${test.key}`)}>
+          <button key={test.key} className="special-card" onClick={() => navigate(test.key === 'mock' ? '/mock' : `/test/${test.key}`)}>
             <span className="special-icon">{test.icon}</span>
             <div className="special-info">
               <div className="special-title">{test.title}</div>

@@ -21,6 +21,7 @@ const chapterMeta: Record<string, ChapterMeta> = {
   '17-考试走向高频必刷': { emoji: '🎯', short: '高频必刷', accent: '#e53935' },
   '18-法律法规标准规范职业道德': { emoji: '⚖️', short: '法规道德', accent: '#78909c' },
   '19-项目管理科学基础运筹学': { emoji: '📐', short: '运筹学', accent: '#5e35b1' },
+  '20-英文术语': { emoji: '🔤', short: '英文术语', accent: '#26a69a' },
 }
 
 const fallback: ChapterMeta = { emoji: '📄', short: '其他章节', accent: '#10aeff' }

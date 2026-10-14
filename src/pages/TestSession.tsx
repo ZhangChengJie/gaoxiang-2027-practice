@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { allQuestions } from '../data/content'
 import { specialTests } from '../data/specialTests'
@@ -7,9 +8,11 @@ import BackButton from '../components/BackButton'
 
 export default function TestSession() {
   const { type } = useParams<{ type: string }>()
-  const { update } = useProgress()
+  const { update, progress } = useProgress()
 
   const test = specialTests.find((t) => t.key === type)
+  // 进入时定好题目：作答会改变错题本，不能让题单在练习中途变化
+  const [questions] = useState(() => (test ? test.filter(allQuestions, progress) : []))
 
   if (!test) {
     return (
@@ -19,8 +22,6 @@ export default function TestSession() {
       </div>
     )
   }
-
-  const questions = test.filter(allQuestions)
 
   return (
     <div className="page test-session-page">

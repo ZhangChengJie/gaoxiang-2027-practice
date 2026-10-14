@@ -1,35 +1,60 @@
 import { useMemo, useState } from 'react'
 import { chapters, allQuestions } from '../data/content'
 import { useProgress } from '../hooks/useProgress'
+import { ERROR_CAUSE_LABELS, REVIEW_INTERVALS_DAYS, isDue } from '../lib/progress'
+import type { ErrorCause, Question } from '../lib/types'
 import Quiz from '../components/Quiz'
 import StatsCard from '../components/StatsCard'
 
+type Filter = 'all' | 'due' | 'none' | ErrorCause
+const CAUSES = Object.keys(ERROR_CAUSE_LABELS) as ErrorCause[]
+
 export default function WrongBook() {
   const { progress, update, clearAllWrong } = useProgress()
-  const [mode, setMode] = useState<'list' | 'quiz'>('list')
+  const [filter, setFilter] = useState<Filter>('all')
+  // 练习时冻结题单：答对推进复习阶段会改变错题本，不能让题目中途消失
+  const [session, setSession] = useState<{ title: string; questions: Question[] } | null>(null)
+  const [now] = useState(Date.now)
 
-  const wrongIds = new Set(Object.keys(progress.wrong))
-
-  const questionsByChapter = useMemo(() => {
-    const map: Record<string, { id: string; chapter: string; text: string; options: string[]; answer: number; explanation: string; wrongCount: number; lastWrongTime: number }[]> = {}
-    for (const ch of chapters) {
-      const wrong = ch.questions
-        .filter((q) => wrongIds.has(q.id))
-        .map((q) => ({
-          ...q,
-          wrongCount: progress.wrong[q.id]?.wrongCount ?? 0,
-          lastWrongTime: progress.wrong[q.id]?.lastWrongTime ?? 0,
-        }))
-      if (wrong.length > 0) {
-        map[ch.title] = wrong
-      }
+  const wrong = progress.wrong
+  const matches = useMemo(() => {
+    return (id: string) => {
+      const r = wrong[id]
+      if (!r) return false
+      if (filter === 'all') return true
+      if (filter === 'due') return isDue(r, now)
+      if (filter === 'none') return !r.cause
+      return r.cause === filter
     }
-    return map
-  }, [chapters, progress.wrong])
+  }, [wrong, filter, now])
 
-  const allWrongQuestions = useMemo(() => allQuestions.filter((q) => wrongIds.has(q.id)), [wrongIds])
+  const filtered = useMemo(() => allQuestions.filter((q) => matches(q.id)), [matches])
+  const byChapter = useMemo(
+    () =>
+      chapters
+        .map((ch) => ({ key: ch.key, title: ch.title, questions: ch.questions.filter((q) => matches(q.id)) }))
+        .filter((c) => c.questions.length > 0),
+    [matches],
+  )
 
-  const totalWrong = Object.keys(progress.wrong).length
+  const records = Object.values(wrong)
+  const totalWrong = records.length
+  const dueCount = records.filter((r) => isDue(r, now)).length
+
+  if (session) {
+    return (
+      <div className="page wrong-page">
+        <div className="wrong-header">
+          <button className="back-btn" onClick={() => setSession(null)}>
+            ← 返回列表
+          </button>
+          <h1>{session.title}</h1>
+          <div />
+        </div>
+        <Quiz questions={session.questions} onAnswer={update} />
+      </div>
+    )
+  }
 
   if (totalWrong === 0) {
     return (
@@ -46,65 +71,83 @@ export default function WrongBook() {
     )
   }
 
-  if (mode === 'quiz') {
-    return (
-      <div className="page wrong-page">
-        <div className="wrong-header">
-          <button className="back-btn" onClick={() => setMode('list')}>
-            ← 返回列表
-          </button>
-          <h1>错题练习</h1>
-          <div />
-        </div>
-        <Quiz questions={allWrongQuestions} onAnswer={update} />
-      </div>
-    )
-  }
+  const count = (f: Filter) =>
+    f === 'all' ? totalWrong : f === 'due' ? dueCount : records.filter((r) => (f === 'none' ? !r.cause : r.cause === f)).length
+  const filters: { key: Filter; label: string }[] = [
+    { key: 'all', label: '全部' },
+    { key: 'due', label: '今日到期' },
+    ...CAUSES.map((c) => ({ key: c as Filter, label: ERROR_CAUSE_LABELS[c] })),
+    { key: 'none', label: '未标错因' },
+  ]
 
   return (
     <div className="page wrong-page">
       <div className="page-header">
         <h1>错题本</h1>
-        <p>共 {totalWrong} 道错题，点击章节进入练习</p>
+        <p>
+          答对后隔 {REVIEW_INTERVALS_DAYS.join(' / ')} 天再复习，到期连续答对 {REVIEW_INTERVALS_DAYS.length + 1} 次才移出
+        </p>
       </div>
 
       <div className="wrong-stats">
         <StatsCard label="总错题" value={totalWrong} />
-        <StatsCard label="涉及章节" value={Object.keys(questionsByChapter).length} />
-        <StatsCard
-          label="高频错题（≥3次）"
-          value={Object.values(progress.wrong).filter((r: { wrongCount: number }) => r.wrongCount >= 3).length}
-        />
+        <StatsCard label="今日到期" value={dueCount} />
+        <StatsCard label="高频错题（≥3次）" value={records.filter((r) => r.wrongCount >= 3).length} />
+      </div>
+
+      <div className="wrong-filters" role="group" aria-label="筛选错题">
+        {filters.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            className={`chip ${filter === f.key ? 'active' : ''}`}
+            aria-pressed={filter === f.key}
+            onClick={() => setFilter(f.key)}
+          >
+            {f.label} {count(f.key)}
+          </button>
+        ))}
       </div>
 
       <div className="wrong-actions">
-        <button className="action-btn primary" onClick={() => setMode('quiz')}>
-          练习全部错题
+        <button
+          className="action-btn primary"
+          disabled={filtered.length === 0}
+          onClick={() => setSession({ title: '错题练习', questions: filtered })}
+        >
+          练习当前筛选（{filtered.length}）
         </button>
-        <button className="action-btn danger" onClick={clearAllWrong}>
+        <button
+          className="action-btn danger"
+          onClick={() => {
+            if (window.confirm(`确定清空全部 ${totalWrong} 道错题？此操作不能撤销。`)) clearAllWrong()
+          }}
+        >
           清空错题本
         </button>
       </div>
 
       <div className="chapter-list">
-        {Object.entries(questionsByChapter).map(([title, questions]) => (
-          <button
-            key={title}
-            className="chapter-card"
-            onClick={() => setMode('quiz')}
-          >
-            <div className="chapter-info">
-              <div className="chapter-title">{title}</div>
-              <div className="chapter-meta">
-                {questions.length} 道错题
-                {questions.some((q) => q.wrongCount >= 3) && (
-                  <span className="high-freq-badge">高频</span>
-                )}
+        {byChapter.length === 0 && <div className="empty-state">当前筛选下没有错题</div>}
+        {byChapter.map((c) => {
+          const due = c.questions.filter((q) => isDue(wrong[q.id], now)).length
+          return (
+            <button
+              key={c.key}
+              className="chapter-card"
+              onClick={() => setSession({ title: c.title, questions: c.questions })}
+            >
+              <div className="chapter-info">
+                <div className="chapter-title">{c.title}</div>
+                <div className="chapter-meta">
+                  {c.questions.length} 道错题{due > 0 && ` · ${due} 道到期`}
+                  {c.questions.some((q) => wrong[q.id].wrongCount >= 3) && <span className="high-freq-badge">高频</span>}
+                </div>
               </div>
-            </div>
-            <div className="wrong-count-badge">{questions.length}</div>
-          </button>
-        ))}
+              <div className="wrong-count-badge">{c.questions.length}</div>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

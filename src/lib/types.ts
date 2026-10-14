@@ -28,18 +28,44 @@ export type SpecialTest = {
   title: string
   description: string
   icon: string
-  filter: (questions: Question[]) => Question[]
+  filter: (questions: Question[], progress: Progress) => Question[]
+}
+
+export type ErrorCause = 'unknown' | 'hesitant' | 'careless' | 'slow'
+
+export type QuestionStat = {
+  attempts: number
+  correct: number
+  lastAnswerTime: number
+  lastCorrect: boolean
 }
 
 export type WrongRecord = {
   id: string
   wrongCount: number
   lastWrongTime: number
+  cause?: ErrorCause
+  reviewStage: number
+  nextReviewAt: number
+}
+
+export type DailyStat = { answered: number; correct: number }
+
+export type MockResult = {
+  at: number
+  total: number
+  correct: number
+  durationSec: number
+  byChapter: Record<string, { total: number; correct: number }>
 }
 
 export type Progress = {
+  version: 2
   answered: Record<string, boolean>
+  stats: Record<string, QuestionStat>
   wrong: Record<string, WrongRecord>
+  daily: Record<string, DailyStat>
+  mockHistory: MockResult[]
 }
 
 export type CaseCategory = {

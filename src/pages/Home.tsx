@@ -3,15 +3,24 @@ import { useNavigate } from 'react-router-dom'
 import { chapters } from '../data/content'
 import { useProgress } from '../hooks/useProgress'
 import { getChapterMeta } from '../lib/chapterMeta'
+import { accuracyOf, todayStat } from '../lib/progress'
 import ProgressRing from '../components/ProgressRing'
 import { ThemeToggle } from '../components/ThemeToggle'
+import DataBackup from '../components/DataBackup'
+
+function accuracyClass(acc: number | null) {
+  if (acc === null) return ''
+  return acc >= 0.7 ? 'acc-good' : acc >= 0.6 ? 'acc-ok' : 'acc-low'
+}
 
 const allChapterQuestions = chapters.flatMap((c) => c.questions)
 
 export default function Home() {
   const navigate = useNavigate()
-  const { chapterProgress, totalStats } = useProgress()
+  const { progress, chapterProgress, totalStats } = useProgress()
   const overall = chapterProgress(allChapterQuestions)
+  const today = todayStat(progress, Date.now())
+  const todayAcc = today.answered > 0 ? Math.round((today.correct / today.answered) * 100) : null
 
   return (
     <div className="page home-page">
@@ -42,12 +51,35 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="today-card" aria-labelledby="today-title">
+        <div className="today-info">
+          <h2 id="today-title">今日任务</h2>
+          <p>
+            到期错题 {totalStats.dueCount} 题 → 新题 · 今日已答 {today.answered} 题
+            {todayAcc !== null && `，正确率 ${todayAcc}%`}
+          </p>
+        </div>
+        <button type="button" className="action-btn primary" onClick={() => navigate('/today')}>
+          开始
+        </button>
+      </section>
+
+      <button type="button" className="mock-entry" onClick={() => navigate('/mock')}>
+        <span aria-hidden="true">📝</span>
+        <span className="mock-entry-text">
+          <strong>机考模拟</strong>
+          <span>75 题 · 150 分钟 · 按真题分布抽题</span>
+        </span>
+        <span aria-hidden="true">›</span>
+      </button>
+
       <section className="home-section" aria-labelledby="chapter-grid-title">
-        <h2 className="section-title" id="chapter-grid-title">章节学习</h2>
+        <h2 className="section-title" id="chapter-grid-title">章节学习 <small className="section-hint">正确率 {'<'}60% 红 · 60–70% 橙 · ≥70% 绿</small></h2>
         <div className="chapter-grid">
           {chapters.map((c) => {
             const prog = chapterProgress(c.questions)
             const meta = getChapterMeta(c.key)
+            const acc = accuracyOf(progress, c.questions.map((q) => q.id)).accuracy
             return (
               <button
                 key={c.key}
@@ -62,12 +94,17 @@ export default function Home() {
                 <span className="chapter-grid-progress" aria-hidden="true">
                   <span style={{ width: `${prog.percent}%` }} />
                 </span>
-                <span className="chapter-grid-count">{prog.done}/{prog.total}</span>
+                <span className="chapter-grid-count">
+                  {prog.done}/{prog.total}
+                  {acc !== null && <span className={`chapter-grid-acc ${accuracyClass(acc)}`}> · {Math.round(acc * 100)}%</span>}
+                </span>
               </button>
             )
           })}
         </div>
       </section>
+
+      <DataBackup />
     </div>
   )
 }

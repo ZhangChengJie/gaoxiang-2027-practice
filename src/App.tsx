@@ -1,6 +1,4 @@
-import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { migrateLegacyProgress } from './lib/storage'
 import TabBar from './components/TabBar'
 import Home from './pages/Home'
 import Chapter from './pages/Chapter'
@@ -9,13 +7,11 @@ import TestSession from './pages/TestSession'
 import WrongBook from './pages/WrongBook'
 import Essay from './pages/Essay'
 import CaseAnalysis from './pages/CaseAnalysis'
+import MockExam from './pages/MockExam'
+import Today from './pages/Today'
 import './styles/wechat.css'
 
 export default function App() {
-  useEffect(() => {
-    migrateLegacyProgress()
-  }, [])
-
   return (
     <BrowserRouter>
       <div className="app">
@@ -27,6 +23,8 @@ export default function App() {
           <Route path="/wrong" element={<WrongBook />} />
           <Route path="/essay" element={<Essay />} />
           <Route path="/case" element={<CaseAnalysis />} />
+          <Route path="/mock" element={<MockExam />} />
+          <Route path="/today" element={<Today />} />
         </Routes>
         <TabBar />
       </div>
