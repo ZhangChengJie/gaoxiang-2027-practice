@@ -17,11 +17,11 @@ export const specialTests: SpecialTest[] = [
   },
   {
     key: 'law',
-    title: '法律法规专项',
-    description: '数据安全法 / 个保法 / 信息安全法',
+    title: '法律法规·职业道德',
+    description: '合同招投标 / 知识产权 / 数据安全 / 标准化 / 职业道德',
     icon: '⚖️',
     filter: (questions: Question[]) =>
-      questions.filter((q) => q.chapter === '13-高级管理与辅助知识域'),
+      questions.filter((q) => q.chapter === '18-法律法规标准规范职业道德'),
   },
   {
     key: 'itto',
@@ -117,5 +117,19 @@ export const specialTests: SpecialTest[] = [
     description: '基于 2026 上半年真题考查方向的原创改编题',
     icon: '🆕',
     filter: (questions: Question[]) => questions.filter((q) => q.chapter === '16-2026真题相似知识点'),
+  },
+  {
+    key: 'exam-trend',
+    title: '考试走向·高频必刷',
+    description: '按 2021-2026 九个考期逐题统计的高频+新增考点',
+    icon: '🎯',
+    filter: (questions: Question[]) => questions.filter((q) => q.chapter === '17-考试走向高频必刷'),
+  },
+  {
+    key: 'operations-research',
+    title: '科学基础·运筹学',
+    description: '线性规划 / 网络计划 / 决策分析 / EOQ / 预测',
+    icon: '📐',
+    filter: (questions: Question[]) => questions.filter((q) => q.chapter === '19-项目管理科学基础运筹学'),
   },
 ]
