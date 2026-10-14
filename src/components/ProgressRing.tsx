@@ -7,13 +7,13 @@ export default function ProgressRing({ percent, size = 44 }: { percent: number; 
   return (
     <div className="progress-ring" style={{ width: size, height: size }}>
       <svg width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e8e8e8" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--progress-track)" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#07C160"
+          stroke="var(--primary)"
           strokeWidth={stroke}
           strokeDasharray={circumference}
           strokeDashoffset={offset}

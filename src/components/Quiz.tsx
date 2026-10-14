@@ -14,13 +14,10 @@ export default function Quiz({
   const [showResult, setShowResult] = useState(false)
 
   const q = questions[index]
-  if (!q || questions.length === 0) {
-    return <div className="empty-state">暂无题目</div>
-  }
 
   const handleSelect = useCallback(
     (i: number) => {
-      if (showResult) return
+      if (showResult || !q) return
       setSelected(i)
       setShowResult(true)
       onAnswer(q, i === q.answer)
@@ -44,13 +41,29 @@ export default function Quiz({
     }
   }, [index])
 
+  if (!q || questions.length === 0) {
+    return <div className="empty-state">暂无题目</div>
+  }
+
   return (
     <div className="quiz-container">
       <div className="quiz-header">
         <span className="quiz-progress">
-          {index + 1} / {questions.length}
+          第 {index + 1} 题 / 共 {questions.length} 题
         </span>
         <span className="quiz-chapter">{q.chapter}</span>
+      </div>
+
+      <div
+        className="quiz-progress-bar"
+        role="progressbar"
+        aria-label="题目位置"
+        aria-valuemin={0}
+        aria-valuemax={questions.length}
+        aria-valuenow={index + 1}
+        aria-valuetext={`第 ${index + 1} 题，共 ${questions.length} 题`}
+      >
+        <span style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
       </div>
 
       <QuestionCard question={q} selected={selected} onSelect={handleSelect} showResult={showResult} />
@@ -76,19 +89,24 @@ export default function Quiz({
         </div>
       )}
 
-      <div className="quiz-dots">
-        {questions.map((_, i) => (
-          <div
-            key={i}
-            className={`quiz-dot ${i === index ? 'active' : ''} ${i < index ? 'done' : ''}`}
-            onClick={() => {
-              setIndex(i)
-              setSelected(null)
-              setShowResult(false)
-            }}
-          />
-        ))}
-      </div>
+      {questions.length <= 20 && (
+        <div className="quiz-dots" aria-label="跳转题目">
+          {questions.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={`quiz-dot ${i === index ? 'active' : ''} ${i < index ? 'done' : ''}`}
+              aria-label={`跳转到第 ${i + 1} 题`}
+              aria-current={i === index ? 'step' : undefined}
+              onClick={() => {
+                setIndex(i)
+                setSelected(null)
+                setShowResult(false)
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
