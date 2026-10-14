@@ -15,6 +15,7 @@ export type Chapter = {
 
 export type EssayContent = {
   chapter: string
+  label: string
   title: string
   scope: string
   points: string[]

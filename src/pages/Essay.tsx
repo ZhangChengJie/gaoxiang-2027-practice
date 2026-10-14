@@ -1,32 +1,23 @@
 import { useState, useRef, useEffect } from 'react'
-import { chapters } from '../data/content'
 import { essayContents } from '../data/essayContent'
 
 export default function Essay() {
-  const [activeChapter, setActiveChapter] = useState(chapters[0]?.key ?? '')
+  const [activeChapter, setActiveChapter] = useState(essayContents[0]?.chapter ?? '')
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const currentEssay = essayContents.find((e) => e.chapter === activeChapter)
-  const currentChapter = chapters.find((c) => c.key === activeChapter)
+  const currentEssay = essayContents.find((e) => e.chapter === activeChapter) ?? essayContents[0]
 
   useEffect(() => {
     const el = scrollRef.current?.querySelector(`[data-key="${activeChapter}"]`) as HTMLElement
     el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
   }, [activeChapter])
 
-  if (!currentEssay || !currentChapter) {
+  if (!currentEssay) {
     return (
       <div className="page essay-page">
         <div className="page-header">
-          <h1>论文范围</h1>
-          <p>选择章节查看对应论文写作知识点</p>
-        </div>
-        <div className="essay-chapter-list">
-          {chapters.map((c) => (
-            <button key={c.key} className="chapter-card" onClick={() => setActiveChapter(c.key)}>
-              <div className="chapter-title">{c.title}</div>
-            </button>
-          ))}
+          <h1>论文写作知识点</h1>
+          <p>按真实命题主题（绩效域 + 十大管理领域）组织</p>
         </div>
       </div>
     )
@@ -36,19 +27,19 @@ export default function Essay() {
     <div className="page essay-page">
       <div className="page-header">
         <h1>论文写作知识点</h1>
-        <p>每个章节涵盖完整的论文写作要点</p>
+        <p>按真实命题主题：写作总论 · 8 大绩效域 · 十大管理领域</p>
       </div>
 
       <div className="essay-chips-wrapper" ref={scrollRef}>
         <div className="essay-chips-scroll">
-          {chapters.map((c) => (
+          {essayContents.map((e) => (
             <button
-              key={c.key}
-              data-key={c.key}
-              className={`chip ${activeChapter === c.key ? 'active' : ''}`}
-              onClick={() => setActiveChapter(c.key)}
+              key={e.chapter}
+              data-key={e.chapter}
+              className={`chip ${activeChapter === e.chapter ? 'active' : ''}`}
+              onClick={() => setActiveChapter(e.chapter)}
             >
-              {c.title}
+              {e.label}
             </button>
           ))}
         </div>
