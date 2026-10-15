@@ -18,9 +18,6 @@ export default function SpecialTests() {
             <div className="special-title">按知识域练习</div>
             <div className="special-desc">24 个真题知识域 · 显示各域正确率</div>
           </div>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 4L10 8L6 12" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
         </button>
         {specialTests.map((test) => (
           <button key={test.key} className="special-card" onClick={() => navigate(test.key === 'mock' ? '/mock' : `/test/${test.key}`)}>
@@ -29,9 +26,6 @@ export default function SpecialTests() {
               <div className="special-title">{test.title}</div>
               <div className="special-desc">{test.description}</div>
             </div>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M6 4L10 8L6 12" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
           </button>
         ))}
       </div>

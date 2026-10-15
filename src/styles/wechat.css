@@ -1299,10 +1299,6 @@ button:focus-visible {
 }
 
 /* 页面内 SVG 的描边也随主题变化，保留现有页面代码。 */
-.special-card svg path {
-  stroke: var(--text-secondary);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .page {
     animation: none;
