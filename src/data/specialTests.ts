@@ -1,6 +1,14 @@
 import type { Question, SpecialTest } from '../lib/types'
 import { buildMockExam } from '../lib/mock'
 
+const IT_DOMAINS = new Set(['informatization', 'it-tech', 'is-governance', 'is-management', 'is-engineering'])
+const PM_FIRST_HALF_DOMAINS = new Set(['pm-basics', 'initiation', 'integration', 'scope', 'schedule', 'cost'])
+const PM_ALL_DOMAINS = new Set([
+  'pm-basics', 'initiation', 'integration', 'scope', 'schedule', 'cost',
+  'quality', 'resource', 'communication', 'risk', 'procurement', 'stakeholder',
+])
+const EXT_DOMAINS = new Set(['performance', 'config-change', 'law-standard', 'advanced'])
+
 export const specialTests: SpecialTest[] = [
   {
     key: 'performance',
@@ -117,5 +125,33 @@ export const specialTests: SpecialTest[] = [
     description: '线性规划 / 网络计划 / 决策分析 / EOQ / 预测',
     icon: '📐',
     filter: (questions: Question[]) => questions.filter((q) => q.chapter === '19-项目管理科学基础运筹学'),
+  },
+  {
+    key: 'checkpoint-1',
+    title: '2705节点①·IT信息技术自测',
+    description: '第2周末(11.29)验收：IT第1~5章（目标正确率≥85%）',
+    icon: '🏁',
+    filter: (questions: Question[]) => questions.filter((q) => IT_DOMAINS.has(q.domain)),
+  },
+  {
+    key: 'checkpoint-2',
+    title: '2705节点②·计划中点小结',
+    description: '第30天(12.16)验收：项目管理前6章（概论至成本）',
+    icon: '⏱️',
+    filter: (questions: Question[]) => questions.filter((q) => PM_FIRST_HALF_DOMAINS.has(q.domain)),
+  },
+  {
+    key: 'checkpoint-3',
+    title: '2705节点③·项目管理全章自测',
+    description: '第7周末(1.3)验收：项目管理第1~13章全覆盖',
+    icon: '🏆',
+    filter: (questions: Question[]) => questions.filter((q) => PM_ALL_DOMAINS.has(q.domain)),
+  },
+  {
+    key: 'checkpoint-4',
+    title: '2705节点④·扩展篇收官自测',
+    description: '第9周末(1.15)验收：绩效域·配置变更·法规·高级管理6章',
+    icon: '🎓',
+    filter: (questions: Question[]) => questions.filter((q) => EXT_DOMAINS.has(q.domain)),
   },
 ]
