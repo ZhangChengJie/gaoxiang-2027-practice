@@ -42,32 +42,37 @@ export default function DataBackup() {
   }
 
   return (
-    <section className="home-section" aria-labelledby="backup-title">
-      <h2 className="section-title" id="backup-title">进度备份</h2>
-      <p className="backup-hint">进度只保存在当前浏览器里，换手机或清缓存前请先导出。</p>
-      <div className="wrong-actions">
-        <button className="action-btn" onClick={handleExport}>
-          导出进度
-        </button>
-        <button className="action-btn" onClick={() => fileInput.current?.click()}>
-          导入进度
-        </button>
-        <input
-          ref={fileInput}
-          type="file"
-          accept="application/json,.json"
-          hidden
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            if (f) void handleImport(f)
-          }}
-        />
+    <details className="backup-details">
+      <summary className="backup-summary">
+        <span>💾 进度备份与导入</span>
+        <span className="backup-summary-hint">换设备 / 清缓存前导出</span>
+      </summary>
+      <div className="backup-body">
+        <p className="backup-hint">进度仅保存在当前浏览器本地，导出 JSON 文件可随时恢复。</p>
+        <div className="wrong-actions">
+          <button type="button" className="action-btn" onClick={handleExport}>
+            导出进度
+          </button>
+          <button type="button" className="action-btn" onClick={() => fileInput.current?.click()}>
+            导入进度
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) void handleImport(f)
+            }}
+          />
+        </div>
+        {message && (
+          <p className="backup-hint" role="status">
+            {message}
+          </p>
+        )}
       </div>
-      {message && (
-        <p className="backup-hint" role="status">
-          {message}
-        </p>
-      )}
-    </section>
+    </details>
   )
 }

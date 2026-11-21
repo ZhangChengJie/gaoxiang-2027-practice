@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState, useCallback, useRef, type TouchEvent } from 'react'
 import { allQuestions } from '../data/content'
 import { useProgress } from '../hooks/useProgress'
 import { buildMockExam, scoreMock, MOCK_DURATION_SEC, MOCK_TOTAL } from '../lib/mock'
@@ -55,6 +55,7 @@ export default function MockExam() {
   const [now, setNow] = useState(Date.now())
   const [showSheet, setShowSheet] = useState(false)
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all')
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const questions = useMemo(
     () => (session ? session.ids.map((id) => byId.get(id)).filter((q): q is Question => q !== undefined) : []),
@@ -301,13 +302,27 @@ export default function MockExam() {
   const flaggedCount = Object.keys(flaggedMap).length
   const isFlagged = q ? Boolean(flaggedMap[q.id]) : false
 
+  const onTouchStart = (e: TouchEvent) => {
+    if (e.touches.length !== 1) return
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }
+  const onTouchEnd = (e: TouchEvent) => {
+    if (!touchStart.current || e.changedTouches.length !== 1) return
+    const dx = e.changedTouches[0].clientX - touchStart.current.x
+    const dy = e.changedTouches[0].clientY - touchStart.current.y
+    touchStart.current = null
+    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    if (dx < 0 && index < questions.length - 1) setIndex(index + 1)
+    else if (dx > 0 && index > 0) setIndex(index - 1)
+  }
+
   return (
-    <div className="page mock-page">
+    <div className="page mock-page quiz-with-sticky" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="mock-bar">
         <span className={`mock-timer ${remaining < 600 ? 'urgent' : ''}`} role="timer" aria-label="剩余时间">
           ⏱ {String(Math.floor(remaining / 60)).padStart(2, '0')}:{String(remaining % 60).padStart(2, '0')}
         </span>
-        <button className="quiz-nav-btn" onClick={() => setShowSheet((v) => !v)}>
+        <button className="quiz-nav-btn" onClick={() => setShowSheet(true)}>
           答题卡 {answeredCount}/{questions.length}{flaggedCount > 0 ? ` · 🚩${flaggedCount}` : ''}
         </button>
         <button
@@ -322,16 +337,28 @@ export default function MockExam() {
       </div>
 
       {showSheet && (
-        <AnswerSheet
-          questions={questions}
-          answers={session.answers}
-          flagged={flaggedMap}
-          index={index}
-          onJump={(i) => {
-            setIndex(i)
-            setShowSheet(false)
-          }}
-        />
+        <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label="答题卡" onClick={() => setShowSheet(false)}>
+          <div className="sheet-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-header">
+              <strong>答题卡（已答 {answeredCount}/{questions.length}{flaggedCount > 0 ? ` · 标疑 ${flaggedCount}` : ''}）</strong>
+              <button type="button" className="sheet-close" onClick={() => setShowSheet(false)} aria-label="关闭">
+                ✕
+              </button>
+            </div>
+            <div className="sheet-body">
+              <AnswerSheet
+                questions={questions}
+                answers={session.answers}
+                flagged={flaggedMap}
+                index={index}
+                onJump={(i) => {
+                  setIndex(i)
+                  setShowSheet(false)
+                }}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {q && (
@@ -348,9 +375,12 @@ export default function MockExam() {
             </button>
           </div>
           <QuestionCard question={q} selected={session.answers[q.id] ?? null} onSelect={choose} showResult={false} />
-          <div className="quiz-nav-buttons">
+          <div className="quiz-sticky-bar" role="region" aria-label="题目导航">
             <button className="quiz-nav-btn" onClick={() => setIndex((i) => i - 1)} disabled={index === 0}>
               ← 上一题
+            </button>
+            <button type="button" className="quiz-sheet-trigger" onClick={() => setShowSheet(true)}>
+              {index + 1}/{questions.length}
             </button>
             <button className="quiz-nav-btn primary" onClick={() => setIndex((i) => i + 1)} disabled={index === questions.length - 1}>
               下一题 →

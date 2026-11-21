@@ -2098,3 +2098,296 @@ button:focus-visible {
 .special-card-checkpoint {
   border-left: 3px solid var(--primary);
 }
+
+/* ========================================
+   v4.1: Native UI Polish
+   ======================================== */
+.tabbar {
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.tabbar-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabbar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.tabbar-badge {
+  position: absolute;
+  top: -4px;
+  right: -10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: var(--on-danger);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-overview-card {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.home-overview-card .home-overview {
+  box-shadow: none;
+  border-radius: 0;
+  padding-bottom: 10px;
+}
+
+.streak-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-muted) 55%, var(--card));
+}
+
+.streak-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.streak-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--progress-track);
+  transition: transform 0.15s;
+}
+
+.streak-dot.level-low {
+  background: color-mix(in srgb, var(--primary) 35%, var(--progress-track));
+}
+
+.streak-dot.level-mid {
+  background: color-mix(in srgb, var(--primary) 70%, var(--progress-track));
+}
+
+.streak-dot.level-high {
+  background: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.streak-label {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+.plan-card {
+  margin-top: 12px;
+  background: linear-gradient(135deg, var(--card) 0%, color-mix(in srgb, var(--primary-light) 45%, var(--card)) 100%);
+  border-radius: 16px;
+}
+
+.chapter-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.chapter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.backup-details {
+  margin-top: 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.backup-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.backup-summary::-webkit-details-marker {
+  display: none;
+}
+
+.backup-summary-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.backup-body {
+  padding: 0 16px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.directory-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.directory-search-input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.directory-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.quiz-with-sticky {
+  padding-bottom: calc(74px + var(--safe-area-bottom));
+}
+
+.wrong-page .quiz-sticky-bar {
+  bottom: calc(var(--tabbar-height) + var(--safe-area-bottom));
+  padding-bottom: 10px;
+}
+
+.wrong-page .quiz-with-sticky {
+  padding-bottom: 84px;
+}
+
+.quiz-sticky-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 10px 16px calc(10px + var(--safe-area-bottom));
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border);
+}
+
+.quiz-sheet-trigger {
+  flex: 0 0 auto;
+  min-width: 68px;
+  height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.quiz-large-font .question-text {
+  font-size: 20px;
+  line-height: 1.85;
+}
+
+.quiz-large-font .option {
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.quiz-large-font .explanation-body {
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.sheet-drawer {
+  width: 100%;
+  max-width: 600px;
+  max-height: 70vh;
+  background: var(--card);
+  border-radius: 18px 18px 0 0;
+  padding: 16px 16px calc(16px + var(--safe-area-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideUp 0.18s ease-out;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+}
+
+.sheet-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.sheet-body {
+  overflow-y: auto;
+  padding-bottom: 4px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0.9; }
+  to { transform: translateY(0); opacity: 1; }
+}

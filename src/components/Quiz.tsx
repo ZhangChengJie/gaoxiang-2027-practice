@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo, type TouchEvent } from 'react'
 import type { ErrorCause, Question } from '../lib/types'
 import { ERROR_CAUSE_LABELS } from '../lib/progress'
 import { useProgress } from '../hooks/useProgress'
@@ -8,6 +8,7 @@ import SessionSummary from './SessionSummary'
 const CAUSES = Object.keys(ERROR_CAUSE_LABELS) as ErrorCause[]
 const CURSOR_STORAGE_KEY = 'gaoxiang-2027-quiz-cursor-v1'
 const SHUFFLE_PREF_KEY = 'gaoxiang-2027-shuffle-options'
+const FONT_PREF_KEY = 'gaoxiang-2027-font-large'
 
 function readCursor(sessionKey?: string): number {
   if (!sessionKey) return 0
@@ -31,11 +32,19 @@ function writeCursor(sessionKey: string | undefined, idx: number): void {
   }
 }
 
-function readShufflePref(): boolean {
+function readBoolPref(key: string): boolean {
   try {
-    return localStorage.getItem(SHUFFLE_PREF_KEY) === '1'
+    return localStorage.getItem(key) === '1'
   } catch {
     return false
+  }
+}
+
+function writeBoolPref(key: string, val: boolean): void {
+  try {
+    localStorage.setItem(key, val ? '1' : '0')
+  } catch {
+    // 忽略
   }
 }
 
@@ -81,9 +90,11 @@ export default function Quiz({
   const { progress, setCause } = useProgress()
   const [onlyUnanswered, setOnlyUnanswered] = useState(false)
   const [unansweredSnapshot, setUnansweredSnapshot] = useState<Question[] | null>(null)
-  const [shuffleOptions, setShuffleOptions] = useState(readShufflePref)
+  const [shuffleOptions, setShuffleOptions] = useState(() => readBoolPref(SHUFFLE_PREF_KEY))
+  const [largeFont, setLargeFont] = useState(() => readBoolPref(FONT_PREF_KEY))
   const [shuffleSeed, setShuffleSeed] = useState(() => Date.now() & 0xffff)
   const [showSheet, setShowSheet] = useState(false)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const baseQuestions = onlyUnanswered && unansweredSnapshot ? unansweredSnapshot : questions
   const displayQuestions = useMemo(
@@ -165,11 +176,28 @@ export default function Quiz({
     const next = !shuffleOptions
     setShuffleOptions(next)
     setAnswers({})
-    try {
-      localStorage.setItem(SHUFFLE_PREF_KEY, next ? '1' : '0')
-    } catch {
-      // 忽略
-    }
+    writeBoolPref(SHUFFLE_PREF_KEY, next)
+  }
+
+  const toggleLargeFont = () => {
+    const next = !largeFont
+    setLargeFont(next)
+    writeBoolPref(FONT_PREF_KEY, next)
+  }
+
+  const onTouchStart = (e: TouchEvent) => {
+    if (e.touches.length !== 1) return
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }
+
+  const onTouchEnd = (e: TouchEvent) => {
+    if (!touchStart.current || e.changedTouches.length !== 1) return
+    const dx = e.changedTouches[0].clientX - touchStart.current.x
+    const dy = e.changedTouches[0].clientY - touchStart.current.y
+    touchStart.current = null
+    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    if (dx < 0 && safeIndex < displayQuestions.length - 1) setIndex(safeIndex + 1)
+    else if (dx > 0 && safeIndex > 0) setIndex(safeIndex - 1)
   }
 
   // 键盘快捷键：A-D / 1-4 选答案，← / → 切题，Enter 下一题
@@ -192,11 +220,13 @@ export default function Quiz({
       } else if ((e.key === 'ArrowRight' || (e.key === 'Enter' && showResult)) && safeIndex < displayQuestions.length - 1) {
         e.preventDefault()
         setIndex(safeIndex + 1)
+      } else if (e.key === 'Escape' && showSheet) {
+        setShowSheet(false)
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [finished, q, showResult, safeIndex, displayQuestions.length, handleSelect])
+  }, [finished, q, showResult, safeIndex, displayQuestions.length, showSheet, handleSelect])
 
   if (questions.length === 0) {
     return <div className="empty-state">暂无题目</div>
@@ -235,7 +265,11 @@ export default function Quiz({
   const wrongRecord = progress.wrong[q.id]
 
   return (
-    <div className="quiz-container">
+    <div
+      className={`quiz-container quiz-with-sticky ${largeFont ? 'quiz-large-font' : ''}`}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
       {questions.length > 1 && (
         <div className="quiz-toolbar" role="toolbar" aria-label="刷题设置">
           {allowFilterUnanswered && (
@@ -258,37 +292,12 @@ export default function Quiz({
           </button>
           <button
             type="button"
-            className={`chip quiz-tool-chip ${showSheet ? 'active' : ''}`}
-            aria-expanded={showSheet}
-            onClick={() => setShowSheet((v) => !v)}
+            className={`chip quiz-tool-chip ${largeFont ? 'active' : ''}`}
+            aria-pressed={largeFont}
+            onClick={toggleLargeFont}
           >
-            题号 {safeIndex + 1}/{displayQuestions.length}
+            {largeFont ? 'A- 标准字' : 'A+ 大字'}
           </button>
-        </div>
-      )}
-
-      {showSheet && (
-        <div className="answer-sheet quiz-sheet" aria-label="题号跳转">
-          {displayQuestions.map((item, i) => {
-            const a = answers[i]
-            const state = a !== undefined
-              ? (a === item.answer ? 'right' : 'miss')
-              : (progress.answered[item.id] ? 'filled' : '')
-            return (
-              <button
-                key={item.id}
-                type="button"
-                className={`answer-sheet-cell ${state} ${i === safeIndex ? 'current' : ''}`}
-                aria-label={`跳转到第 ${i + 1} 题`}
-                onClick={() => {
-                  setIndex(i)
-                  setShowSheet(false)
-                }}
-              >
-                {i + 1}
-              </button>
-            )
-          })}
         </div>
       )}
 
@@ -330,29 +339,77 @@ export default function Quiz({
         </div>
       )}
 
-      <div className="quiz-nav-buttons">
+      {!isLast && answeredCount > 0 && (
+        <button type="button" className="quiz-finish-link" onClick={finish}>
+          结束本轮，查看小结（已答 {answeredCount} 题）
+        </button>
+      )}
+
+      <div className="quiz-sticky-bar" role="region" aria-label="题目导航">
         <button
+          type="button"
           className="quiz-nav-btn"
           onClick={() => setIndex((i) => Math.max(0, i - 1))}
           disabled={safeIndex === 0}
         >
           ← 上一题
         </button>
+        <button
+          type="button"
+          className="quiz-sheet-trigger"
+          onClick={() => setShowSheet(true)}
+          aria-label={`打开题号列表，当前第 ${safeIndex + 1} 题，共 ${displayQuestions.length} 题`}
+        >
+          {safeIndex + 1}/{displayQuestions.length}
+        </button>
         {isLast ? (
-          <button className="quiz-nav-btn primary" onClick={finish} disabled={answeredCount === 0}>
+          <button type="button" className="quiz-nav-btn primary" onClick={finish} disabled={answeredCount === 0}>
             查看小结
           </button>
         ) : (
-          <button className="quiz-nav-btn primary" onClick={() => setIndex((i) => Math.min(displayQuestions.length - 1, i + 1))}>
+          <button
+            type="button"
+            className="quiz-nav-btn primary"
+            onClick={() => setIndex((i) => Math.min(displayQuestions.length - 1, i + 1))}
+          >
             {showResult ? '下一题 →' : '跳过 →'}
           </button>
         )}
       </div>
 
-      {!isLast && answeredCount > 0 && (
-        <button type="button" className="quiz-finish-link" onClick={finish}>
-          结束本轮，查看小结（已答 {answeredCount} 题）
-        </button>
+      {showSheet && (
+        <div className="sheet-backdrop" role="dialog" aria-modal="true" aria-label="题号跳转" onClick={() => setShowSheet(false)}>
+          <div className="sheet-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-header">
+              <strong>题号列表（{safeIndex + 1}/{displayQuestions.length}）</strong>
+              <button type="button" className="sheet-close" onClick={() => setShowSheet(false)} aria-label="关闭">
+                ✕
+              </button>
+            </div>
+            <div className="answer-sheet sheet-body">
+              {displayQuestions.map((item, i) => {
+                const a = answers[i]
+                const state = a !== undefined
+                  ? (a === item.answer ? 'right' : 'miss')
+                  : (progress.answered[item.id] ? 'filled' : '')
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`answer-sheet-cell ${state} ${i === safeIndex ? 'current' : ''}`}
+                    aria-label={`跳转到第 ${i + 1} 题`}
+                    onClick={() => {
+                      setIndex(i)
+                      setShowSheet(false)
+                    }}
+                  >
+                    {i + 1}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

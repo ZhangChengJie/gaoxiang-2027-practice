@@ -46,6 +46,8 @@ export default function TopicDirectory({
   renderDetail: (id: string) => ReactNode
 }) {
   const [params, setParams] = useSearchParams()
+  const [query, setQuery] = useState('')
+  const [onlyUnread, setOnlyUnread] = useState(false)
   const { read, markRead } = useReadTopics(storageKey)
   const flat = groups.flatMap((g) => g.items.map((item) => ({ ...item, group: g })))
   const currentId = params.get('topic')
@@ -103,6 +105,17 @@ export default function TopicDirectory({
   }
 
   const readCount = flat.filter((t) => read.has(t.id)).length
+  const q = query.trim().toLowerCase()
+  const visibleGroups = groups
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((t) => {
+        if (onlyUnread && read.has(t.id)) return false
+        if (!q) return true
+        return t.title.toLowerCase().includes(q) || t.subtitle.toLowerCase().includes(q)
+      }),
+    }))
+    .filter((g) => g.items.length > 0)
 
   return (
     <div className="page topic-page">
@@ -113,7 +126,30 @@ export default function TopicDirectory({
         </p>
       </div>
 
-      {groups.map((g) => (
+      <div className="directory-search-bar">
+        <input
+          type="search"
+          className="directory-search-input"
+          placeholder="搜索标题或关键词…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="搜索目录"
+        />
+        <button
+          type="button"
+          className={`chip ${onlyUnread ? 'active' : ''}`}
+          aria-pressed={onlyUnread}
+          onClick={() => setOnlyUnread((v) => !v)}
+        >
+          只看未读
+        </button>
+      </div>
+
+      {visibleGroups.length === 0 && (
+        <div className="empty-state">没有匹配的篇目</div>
+      )}
+
+      {visibleGroups.map((g) => (
         <section key={g.key} className="topic-group" aria-labelledby={`topic-group-${g.key}`}>
           <h2 className="topic-group-title" id={`topic-group-${g.key}`}>
             <span aria-hidden="true">{g.icon}</span> {g.title}

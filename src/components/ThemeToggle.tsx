@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -17,10 +17,27 @@ function readTheme(): Theme {
   return current === 'light' || current === 'dark' ? current : 'system'
 }
 
+function syncThemeColor(theme: Theme) {
+  const isDark =
+    theme === 'dark'
+    || (theme === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches)
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) meta.setAttribute('content', isDark ? '#121212' : '#f5f5f5')
+}
+
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>(readTheme)
   const next = nextThemes[theme]
   const label = `当前主题：${themeNames[theme]}，切换为${themeNames[next]}`
+
+  useEffect(() => {
+    syncThemeColor(theme)
+    if (theme !== 'system' || !window.matchMedia) return
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = () => syncThemeColor('system')
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [theme])
 
   const handleToggle = () => {
     if (next === 'system') {
