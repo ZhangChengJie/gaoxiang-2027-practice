@@ -15,10 +15,24 @@ const groups: TopicGroup[] = [
     items: essayContents.filter((e) => e.chapter.startsWith('pd-')).map(toItem),
   },
   {
+    key: 'ai',
+    title: 'AI 与大模型项目专题',
+    icon: '🤖',
+    hint: '2026–2027 热门实战背景',
+    items: essayContents.filter((e) => e.chapter.startsWith('ai-')).map(toItem),
+  },
+  {
     key: 'areas',
     title: '十大管理领域',
     icon: '🧩',
-    items: essayContents.filter((e) => e.chapter !== 'intro' && !e.chapter.startsWith('pd-')).map(toItem),
+    items: essayContents.filter((e) => e.chapter.startsWith('ka-')).map(toItem),
+  },
+  {
+    key: 'ext',
+    title: '扩展高频与复合专题',
+    icon: '🏛️',
+    hint: '配置/项目集/立项/多供应商',
+    items: essayContents.filter((e) => e.chapter.startsWith('ext-')).map(toItem),
   },
 ]
 

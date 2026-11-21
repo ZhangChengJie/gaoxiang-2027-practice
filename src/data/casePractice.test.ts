@@ -111,8 +111,8 @@ describe('casePractice:', () => {
 
   it('18 条提纲与既有论文章节一一对应，每条检查项唯一且 6—10 条', () => {
     expect(OUTLINE_MINUTES).toBe(15)
-    expect(essayOutlines).toHaveLength(18)
-    expect(new Set(essayOutlines.map((e) => e.essayId)).size).toBe(18)
+    expect(essayOutlines).toHaveLength(31)
+    expect(new Set(essayOutlines.map((e) => e.essayId)).size).toBe(31)
     expect(essayOutlines.map((e) => e.essayId).sort()).toEqual(essayContents.map((e) => e.chapter).sort())
     for (const essay of essayOutlines) {
       expect(essay.checklist.length).toBeGreaterThanOrEqual(6)
