@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import TabBar from './components/TabBar'
 import UpdatePrompt from './components/UpdatePrompt'
+import AutoSyncWatcher from './components/AutoSyncWatcher'
 import Home from './pages/Home'
 import './styles/wechat.css'
 
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/cheatsheet" element={<CheatSheet />} />
           </Routes>
         </Suspense>
+        <AutoSyncWatcher />
         <UpdatePrompt />
         <TabBar />
       </div>

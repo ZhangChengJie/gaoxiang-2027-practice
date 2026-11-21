@@ -7,6 +7,7 @@ import { accuracyOf, localDateKey, todayStat, weakestDomains } from '../lib/prog
 import { getStudyPlanStatus, PLAN_TOTAL_DAYS, PLAN_TOTAL_WEEKS } from '../lib/studyPlan2705'
 import ProgressRing from '../components/ProgressRing'
 import { ThemeToggle } from '../components/ThemeToggle'
+import CloudSync from '../components/CloudSync'
 import DataBackup from '../components/DataBackup'
 
 function accuracyClass(acc: number | null) {
@@ -216,6 +217,8 @@ export default function Home() {
           })}
         </div>
       </section>
+
+      <CloudSync />
 
       <DataBackup />
 
