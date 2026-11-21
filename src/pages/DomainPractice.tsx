@@ -69,7 +69,7 @@ function DomainQuiz({ domain }: { domain: string }) {
         <h1>{domainTitle(domain)}</h1>
         <p>{questions.length} 道题 · 未做过的排在前面</p>
       </div>
-      {questions.length === 0 ? <div className="empty-state">暂无题目</div> : <Quiz questions={questions} onAnswer={update} />}
+      {questions.length === 0 ? <div className="empty-state">暂无题目</div> : <Quiz key={domain} sessionKey={`domain:${domain}`} questions={questions} onAnswer={update} />}
     </div>
   )
 }

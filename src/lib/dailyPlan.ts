@@ -6,7 +6,11 @@ export const DAILY_REVIEW_COUNT = 15
 export const DAILY_NEW_COUNT = 30
 
 export function buildDailyPlan(
-  allQuestions: Question[], p: Progress, now: number, rng: () => number = Math.random,
+  allQuestions: Question[],
+  p: Progress,
+  now: number,
+  rng: () => number = Math.random,
+  scopeDomains?: ReadonlySet<string>,
 ): { review: Question[]; fresh: Question[] } {
   const byId = new Map(allQuestions.map((q) => [q.id, q]))
   const review = dueWrongIds(p, now).flatMap((id) => {
@@ -14,7 +18,11 @@ export function buildDailyPlan(
     return question ? [question] : []
   }).slice(0, DAILY_REVIEW_COUNT)
   const selected = new Set(review.map((q) => q.id))
-  const eligibleDomains = new Set(DOMAINS.filter((domain) => domain.mockWeight > 0).map((domain) => domain.key))
+  const eligibleDomains = new Set(
+    DOMAINS
+      .filter((domain) => domain.mockWeight > 0 && (!scopeDomains || scopeDomains.has(domain.key)))
+      .map((domain) => domain.key),
+  )
   const eligible = [...byId.values()].filter((q) => eligibleDomains.has(q.domain))
   const domains = new Map<string, Question[]>()
   for (const question of eligible) {

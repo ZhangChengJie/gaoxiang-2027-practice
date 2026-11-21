@@ -52,7 +52,7 @@ describe('dailyPlan:', () => {
     p = applyAnswer(p, pending.id, false, now)
     p.wrong[pending.id].nextReviewAt = now + 1
     p.answered[old.id] = true
-    const ignored = question('advanced', 1)
+    const ignored = question('method', 1)
     const qs = [highQ, lowQ, newQ, recent, pending, old, ignored]
     const plan = buildDailyPlan(qs, p, now, () => 0)
     expect(plan.review).toEqual([])
@@ -82,7 +82,7 @@ describe('dailyPlan:', () => {
     const risk = question('risk', 1)
     const english = question('english', 1, '20-英文术语')
     const perf = question('performance', 1, 'performance')
-    const ignored = ['method', 'advanced', 'unknown'].map((domain) => question(domain, 1))
+    const ignored = ['method', 'unknown'].map((domain) => question(domain, 1))
     const plan = buildDailyPlan([risk, cost, english, perf, failed, passed, costHistory, ...ignored], p, now, () => 0)
     expect(plan.fresh.slice(0, 4)).toEqual([cost, risk, english, perf])
     expect(plan.fresh.some((q) => ignored.includes(q))).toBe(false)
@@ -90,9 +90,8 @@ describe('dailyPlan:', () => {
 
   it('到期方法域错题仍复习，但不作为 fresh 候选；固定 rng 可复现同正确率域的轮转顺序', () => {
     const method = question('method', 1)
-    const advanced = question('advanced', 1)
     const p = applyAnswer(emptyProgress(), method.id, false, now)
-    const qs = [method, advanced, ...[low, high, medium].flatMap((domain) => [question(domain, 1), question(domain, 2)])]
+    const qs = [method, ...[low, high, medium].flatMap((domain) => [question(domain, 1), question(domain, 2)])]
     const original = structuredClone(qs)
     const build = () => {
       const values = [0.9, 0.1, 0.5]
@@ -103,5 +102,11 @@ describe('dailyPlan:', () => {
     expect(build().fresh.slice(0, 3).map((q) => q.domain)).toEqual([high, medium, low])
     expect(build().fresh).toHaveLength(6)
     expect(qs).toEqual(original)
+  })
+
+  it('指定 scopeDomains 时，新题仅从该范围知识域中抽取', () => {
+    const qs = [question('informatization', 1), question('risk', 1), question('cost', 1)]
+    const plan = buildDailyPlan(qs, emptyProgress(), now, () => 0, new Set(['informatization']))
+    expect(plan.fresh.map((q) => q.domain)).toEqual(['informatization'])
   })
 })

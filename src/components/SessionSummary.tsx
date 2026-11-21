@@ -6,12 +6,14 @@ export default function SessionSummary({
   questions,
   answers,
   elapsedSec,
+  targetAccuracy,
   onRestart,
   onBack,
 }: {
   questions: Question[]
   answers: Record<number, number>
   elapsedSec: number
+  targetAccuracy?: number
   onRestart: () => void
   onBack: () => void
 }) {
@@ -19,7 +21,10 @@ export default function SessionSummary({
   const correct = answered.filter((i) => answers[i] === questions[i].answer).length
   const missed = answered.filter((i) => answers[i] !== questions[i].answer)
   const accuracy = answered.length > 0 ? Math.round((correct / answered.length) * 100) : 0
-  const verdict = accuracy >= 70 ? '达到阶段二目标（≥70%）' : accuracy >= 60 ? '达到阶段一目标（≥60%）' : '未达 60%，错题请标好错因后复测'
+  const targetPct = targetAccuracy ? Math.round(targetAccuracy * 100) : null
+  const verdict = targetPct !== null
+    ? (accuracy >= targetPct ? `🎉 验收达标（≥${targetPct}%）` : `距验收目标 ${targetPct}% 还差 ${targetPct - accuracy}%，复盘错题后再测`)
+    : accuracy >= 70 ? '达到阶段二目标（≥70%）' : accuracy >= 60 ? '达到阶段一目标（≥60%）' : '未达 60%，错题请标好错因后复测'
 
   return (
     <div className="session-summary">

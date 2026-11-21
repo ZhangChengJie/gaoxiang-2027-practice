@@ -4,6 +4,7 @@ import { chapters } from '../data/content'
 import { useProgress } from '../hooks/useProgress'
 import { getChapterMeta } from '../lib/chapterMeta'
 import { accuracyOf, todayStat, weakestDomains } from '../lib/progress'
+import { getStudyPlanStatus, PLAN_TOTAL_DAYS, PLAN_TOTAL_WEEKS } from '../lib/studyPlan2705'
 import { allQuestions } from '../data/content'
 import ProgressRing from '../components/ProgressRing'
 import { ThemeToggle } from '../components/ThemeToggle'
@@ -21,6 +22,7 @@ export default function Home() {
   const { progress, chapterProgress, totalStats } = useProgress()
   const overall = chapterProgress(allChapterQuestions)
   const today = todayStat(progress, Date.now())
+  const plan = getStudyPlanStatus(Date.now())
   const weak = weakestDomains(progress, allQuestions)
   const todayAcc = today.answered > 0 ? Math.round((today.correct / today.answered) * 100) : null
 
@@ -50,6 +52,30 @@ export default function Home() {
         <div className="stat-item">
           <span className="stat-number">{chapters.length}</span>
           <span className="stat-label">章节数</span>
+        </div>
+      </section>
+
+      <section className="plan-card" aria-label="2705 考期学习计划">
+        <div className="plan-card-top">
+          <div>
+            <div className="plan-card-badge">
+              2705 考期 · 第 {plan.week}/{PLAN_TOTAL_WEEKS} 周（第 {plan.dayIndex}/{PLAN_TOTAL_DAYS} 天）
+            </div>
+            <div className="plan-card-title">{plan.stage.label}</div>
+            <div className="plan-card-sub">
+              {plan.stage.shortTitle} · {plan.isFinished ? '基础期已收官' : plan.daysToCheckpoint === 0 ? '今日节点验收' : `距验收节点（${plan.stage.endDate.slice(5)}）还有 ${plan.daysToCheckpoint} 天`}
+            </div>
+          </div>
+          <button
+            type="button"
+            className="action-btn plan-card-btn"
+            onClick={() => navigate(`/test/${plan.stage.checkpointKey}`)}
+          >
+            去验收
+          </button>
+        </div>
+        <div className="plan-progress-bar" aria-hidden="true">
+          <span style={{ width: `${plan.percent}%` }} />
         </div>
       </section>
 

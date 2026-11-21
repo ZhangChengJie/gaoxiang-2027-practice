@@ -93,7 +93,11 @@ export function loadProgress(): Progress {
 }
 
 export function saveProgress(p: Progress): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(p))
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p))
+  } catch {
+    // 隐私模式或存储配额满时避免打断作答
+  }
 }
 
 export function exportProgress(p: Progress, now: number): string {

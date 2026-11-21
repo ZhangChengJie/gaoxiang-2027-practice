@@ -76,7 +76,7 @@ export default function OutlinePractice({ outline }: { outline: EssayOutline }) 
             <textarea
               className="case-answer"
               rows={10}
-              placeholder={'摘要：……\n一、项目背景：……\n二、……（动作 + 量化结果）\n三、……\n结尾：不足与改进'}
+              placeholder={'一、项目背景与个人角色：……\n二、核心管理动作（过程/绩效域 + 工具 + 量化结果）：……\n三、……\n四、总结：真实不足与改进方向'}
               value={text}
               onChange={(e) => setRecords(saveDraft(records, key, 'text', e.target.value))}
               aria-label="提纲"

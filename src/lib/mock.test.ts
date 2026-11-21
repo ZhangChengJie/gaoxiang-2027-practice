@@ -62,7 +62,7 @@ describe('mock:', () => {
     const allowed = questions('risk', 4)
     const bank = [
       ...allowed, allowed[0],
-      ...['advanced', 'method', 'unknown'].flatMap((domain) => questions(domain, 100)),
+      ...['method', 'unknown'].flatMap((domain) => questions(domain, 100)),
       ...['09', '09a', '09-高分论文方法', '09a-论文范文集'].flatMap((chapter) => questions('risk', 100, chapter)),
     ]
     const exam = buildMockExam(bank, seeded(10))

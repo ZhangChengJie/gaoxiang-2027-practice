@@ -25,7 +25,7 @@ export default function Chapter() {
         <h1>{chapter.title}</h1>
         <p>{chapter.questions.length} 道题目 · 答错自动进入错题本</p>
       </div>
-      <Quiz questions={chapter.questions} onAnswer={update} />
+      <Quiz key={chapter.key} sessionKey={`chapter:${chapter.key}`} questions={chapter.questions} onAnswer={update} />
     </div>
   )
 }

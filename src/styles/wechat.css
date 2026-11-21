@@ -1997,3 +1997,104 @@ button:focus-visible {
   font-size: 12px;
   text-align: center;
 }
+
+/* ========================================
+   v4: 2705 Study Plan, Quiz Toolbar, Flags
+   ======================================== */
+.plan-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-card);
+  border-left: 4px solid var(--primary);
+}
+
+.plan-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.plan-card-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 3px;
+}
+
+.plan-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.plan-card-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.plan-card-btn {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.plan-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.plan-progress-bar span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.quiz-toolbar,
+.mode-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quiz-tool-chip {
+  padding: 5px 11px;
+  font-size: 12px;
+}
+
+.quiz-sheet {
+  max-height: 220px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.flag-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.flag-btn.flagged {
+  background: var(--practice-bg);
+  color: var(--orange);
+  border-color: var(--orange);
+}
+
+.answer-sheet-cell.flagged {
+  box-shadow: inset 0 0 0 2px var(--orange);
+}
+
+.special-card-checkpoint {
+  border-left: 3px solid var(--primary);
+}

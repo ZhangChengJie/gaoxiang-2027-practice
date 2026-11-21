@@ -27,7 +27,15 @@ export default function CasePracticeRunner({ practice }: { practice: CasePractic
   }, [phase])
 
   const marksRaw = draft[MARKS]
-  const marks = useMemo(() => new Set<string>(marksRaw ? (JSON.parse(marksRaw) as string[]) : []), [marksRaw])
+  const marks = useMemo(() => {
+    if (!marksRaw) return new Set<string>()
+    try {
+      const parsed = JSON.parse(marksRaw)
+      return new Set<string>(Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [])
+    } catch {
+      return new Set<string>()
+    }
+  }, [marksRaw])
   const toggleMark = (k: string) => {
     const next = new Set(marks)
     if (next.has(k)) next.delete(k)

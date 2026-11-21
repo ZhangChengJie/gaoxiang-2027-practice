@@ -1,7 +1,7 @@
 import { useCallback, useSyncExternalStore } from 'react'
 import { loadProgress, saveProgress, STORAGE_KEY } from '../lib/storage'
 import {
-  applyAnswer, clearAllWrong as clearWrongRecords, dueWrongIds, recordMock,
+  applyAnswer, applyAnswersBatch, clearAllWrong as clearWrongRecords, dueWrongIds, recordMock,
   removeWrong, setWrongCause,
 } from '../lib/progress'
 import type { ErrorCause, MockResult, Progress, Question } from '../lib/types'
@@ -42,6 +42,16 @@ function replaceProgress(p: Progress): void {
 function update(q: Question, right: boolean): void {
   replaceProgress(applyAnswer(getSnapshot(), q.id, right, Date.now()))
 }
+function updateBatch(entries: { q: Question; right: boolean }[], mockResult?: MockResult): void {
+  const now = Date.now()
+  let next = applyAnswersBatch(
+    getSnapshot(),
+    entries.map(({ q, right }) => ({ questionId: q.id, right })),
+    now,
+  )
+  if (mockResult) next = recordMock(next, mockResult)
+  replaceProgress(next)
+}
 function setCause(id: string, cause: ErrorCause): void {
   replaceProgress(setWrongCause(getSnapshot(), id, cause))
 }
@@ -71,7 +81,7 @@ export function useProgress() {
     dueCount: dueWrongIds(progress, Date.now()).length,
   }
   return {
-    progress, update, setCause, clearWrong, clearAllWrong, recordMockResult, replaceProgress,
+    progress, update, updateBatch, setCause, clearWrong, clearAllWrong, recordMockResult, replaceProgress,
     chapterProgress, totalStats, wrongQuestions,
   }
 }

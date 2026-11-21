@@ -53,6 +53,18 @@ export function applyAnswer(p: Progress, questionId: string, right: boolean, now
   }
 }
 
+export function applyAnswersBatch(
+  p: Progress,
+  entries: { questionId: string; right: boolean }[],
+  now: number,
+): Progress {
+  let next = p
+  for (const { questionId, right } of entries) {
+    next = applyAnswer(next, questionId, right, now)
+  }
+  return next
+}
+
 export function setWrongCause(p: Progress, questionId: string, cause: ErrorCause): Progress {
   const record = p.wrong[questionId]
   if (!record) return p
