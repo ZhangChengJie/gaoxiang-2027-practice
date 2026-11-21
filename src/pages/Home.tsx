@@ -140,14 +140,24 @@ export default function Home() {
         </button>
       </section>
 
-      <button type="button" className="mock-entry" onClick={() => navigate('/mock')}>
-        <span aria-hidden="true">📝</span>
-        <span className="mock-entry-text">
-          <strong>机考模拟</strong>
-          <span>75 题 · 150 分钟 · 按真题分布抽题</span>
-        </span>
-        <span aria-hidden="true">›</span>
-      </button>
+      <div className="quick-entries">
+        <button type="button" className="mock-entry" onClick={() => navigate('/mock')}>
+          <span aria-hidden="true">📝</span>
+          <span className="mock-entry-text">
+            <strong>机考模拟</strong>
+            <span>75 题 · 150 分钟</span>
+          </span>
+          <span aria-hidden="true">›</span>
+        </button>
+        <button type="button" className="mock-entry" onClick={() => navigate('/cheatsheet')}>
+          <span aria-hidden="true">📖</span>
+          <span className="mock-entry-text">
+            <strong>速查口袋书</strong>
+            <span>ITTO · 公式 · 图卡</span>
+          </span>
+          <span aria-hidden="true">›</span>
+        </button>
+      </div>
 
       {weak.length > 0 && (
         <section className="weak-card" aria-labelledby="weak-title">

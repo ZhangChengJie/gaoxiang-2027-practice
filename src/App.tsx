@@ -14,6 +14,7 @@ const CaseAnalysis = lazy(() => import('./pages/CaseAnalysis'))
 const MockExam = lazy(() => import('./pages/MockExam'))
 const Today = lazy(() => import('./pages/Today'))
 const DomainPractice = lazy(() => import('./pages/DomainPractice'))
+const CheatSheet = lazy(() => import('./pages/CheatSheet'))
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/today" element={<Today />} />
             <Route path="/domain" element={<DomainPractice />} />
             <Route path="/domain/:key" element={<DomainPractice />} />
+            <Route path="/cheatsheet" element={<CheatSheet />} />
           </Routes>
         </Suspense>
         <UpdatePrompt />

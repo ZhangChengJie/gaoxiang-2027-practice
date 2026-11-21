@@ -48,6 +48,13 @@ export default function SpecialTests() {
               <div className="special-desc">24 个真题知识域 · 显示各域正确率</div>
             </div>
           </button>
+          <button className="special-card" onClick={() => navigate('/cheatsheet')}>
+            <span className="special-icon">📖</span>
+            <div className="special-info">
+              <div className="special-title">速查口袋书</div>
+              <div className="special-desc">49 过程 ITTO · 25 公式 · 6 张标准图卡</div>
+            </div>
+          </button>
           {coreTests.map((test) => (
             <button key={test.key} className="special-card" onClick={() => go(test.key)}>
               <span className="special-icon">{test.icon}</span>

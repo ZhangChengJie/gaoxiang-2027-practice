@@ -13,13 +13,13 @@ function reference(caseId: string, index: number): string {
 }
 
 describe('casePractice:', () => {
-  it('20 套稳定唯一标识，题型配额 6/8/3/3', () => {
-    expect(casePractices).toHaveLength(20)
-    expect(new Set(casePractices.map((p) => p.id)).size).toBe(20)
-    expect(casePractices.map((p) => p.id)).toEqual(Array.from({ length: 20 }, (_, i) => `cp-${String(i + 1).padStart(2, '0')}`))
+  it('24 套稳定唯一标识，题型配额 8/9/3/4', () => {
+    expect(casePractices).toHaveLength(24)
+    expect(new Set(casePractices.map((p) => p.id)).size).toBe(24)
+    expect(casePractices.map((p) => p.id)).toEqual(Array.from({ length: 24 }, (_, i) => `cp-${String(i + 1).padStart(2, '0')}`))
     const counts = Object.fromEntries(['calc', 'fault', 'theory', 'mixed'].map((kind) =>
       [kind, casePractices.filter((p) => p.kind === kind).length]))
-    expect(counts).toEqual({ calc: 6, fault: 8, theory: 3, mixed: 3 })
+    expect(counts).toEqual({ calc: 8, fault: 9, theory: 3, mixed: 4 })
   })
 
   for (const practice of casePractices) {
@@ -107,6 +107,17 @@ describe('casePractice:', () => {
     expect(reference('cp-18', 0)).toContain(`=${400 / (160 / 200)} 万元`)
     expect(reference('cp-19', 0)).toContain(`最早完工 ${4 + 3 + 2} 天`)
     expect(reference('cp-20', 1)).toContain(`${92 / 100 * 100}%`)
+    // cp-21: FPIF PTA & CPIF 合同计算独立验算
+    expect(reference('cp-21', 0)).toContain(`${(200 + (240 - 220) / 0.7).toFixed(2)} 万元`)
+    expect(reference('cp-21', 1)).toContain(`${(180 + 20 + (200 - 180) * 0.3).toFixed(2)} 万元`)
+    expect(reference('cp-21', 1)).toContain('240.00 万元')
+    expect(reference('cp-21', 2)).toContain('170.00 万元')
+    expect(reference('cp-21', 2)).toContain('262.00 万元')
+    // cp-22: 双代号网络含虚活动 & 资源平衡
+    expect(reference('cp-22', 0)).toContain('14 天')
+    expect(reference('cp-22', 2)).toContain(`${4 + 5 + 6 + 5 + 4} 天`)
+    // cp-24: AI 算力 EVM
+    expect(reference('cp-24', 0)).toContain(`${(300 / (120 / 160)).toFixed(2)} 万元`)
   })
 
   it('18 条提纲与既有论文章节一一对应，每条检查项唯一且 6—10 条', () => {
