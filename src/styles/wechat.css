@@ -2711,3 +2711,387 @@ button:focus-visible {
 .sync-status.err {
   color: var(--danger);
 }
+
+/* ========================================
+   v4.4: Compact App-like Home & Sync Sheet
+   ======================================== */
+.home-header {
+  padding: 6px 0 12px;
+}
+
+.home-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-icon-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.header-icon-btn:active {
+  background: var(--surface-active);
+  transform: scale(0.94);
+}
+
+.header-icon-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sync-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--card);
+}
+
+.sync-dot.on {
+  background: var(--primary);
+}
+
+.sync-dot.off {
+  background: var(--text-light);
+  opacity: 0.45;
+}
+
+.home-overview-card .home-overview {
+  padding: 12px 10px 10px;
+}
+
+.home-overview-card .stat-number {
+  font-size: 21px;
+}
+
+.home-overview-card .streak-strip {
+  padding: 7px 12px 10px;
+}
+
+.focus-card {
+  margin-top: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.focus-today {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary-light) 70%, var(--card)) 0%, var(--card) 100%);
+}
+
+.focus-today-info {
+  min-width: 0;
+}
+
+.focus-today-info h2 {
+  margin: 0 0 3px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.focus-today-info p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.focus-start-btn {
+  flex: 0 0 auto;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.focus-plan {
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.focus-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.focus-plan-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.focus-plan-stage {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.focus-plan-days {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.focus-plan-link {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  padding: 2px 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.focus-plan .plan-progress-bar {
+  height: 4px;
+  margin-top: 0;
+}
+
+.quick-entries .mock-entry {
+  padding: 11px 12px;
+  gap: 10px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.quick-entry-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.quick-entry-icon.tone-blue {
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 12%, var(--card));
+}
+
+.quick-entry-icon.tone-green {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+}
+
+.quick-entry-arrow {
+  font-size: 18px;
+  color: var(--text-light);
+  line-height: 1;
+}
+
+.home-section {
+  margin-top: 18px;
+}
+
+.section-head-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.section-head-row .section-title {
+  margin: 0;
+}
+
+.section-head-row .section-hint {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+.home-page .chapter-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.home-page .chapter-grid-item {
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  text-align: left;
+  box-shadow: var(--shadow-card);
+}
+
+.chapter-tile-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chapter-code-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--chapter-accent);
+  background: color-mix(in srgb, var(--chapter-accent) 13%, var(--card));
+  flex-shrink: 0;
+}
+
+.home-page .chapter-grid-label {
+  display: block;
+  -webkit-line-clamp: unset;
+  min-height: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chapter-tile-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-page .chapter-grid-progress {
+  flex: 1;
+  width: auto;
+  height: 3px;
+  margin-top: 0;
+}
+
+.home-page .chapter-grid-count {
+  margin-top: 0;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.chapter-expand-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.chapter-expand-btn:active {
+  background: var(--surface-active);
+}
+
+/* Sync & Backup Bottom Sheet */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet-panel {
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  padding: 10px 16px calc(20px + var(--safe-area-bottom));
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.16);
+}
+
+@media (min-width: 600px) {
+  .sheet-backdrop {
+    align-items: center;
+    padding: 16px;
+  }
+  .sheet-panel {
+    border-radius: 20px;
+    padding: 14px 20px 20px;
+  }
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  margin: 0 auto 10px;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sheet-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface-active);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.sheet-body .sync-card {
+  margin-top: 0;
+}
+
+.sheet-body .backup-details {
+  margin-top: 12px;
+}
+
+.sheet-version {
+  margin: 16px 0 0;
+}

@@ -44,8 +44,8 @@ export default function DataBackup() {
   return (
     <details className="backup-details">
       <summary className="backup-summary">
-        <span>💾 进度备份与导入</span>
-        <span className="backup-summary-hint">换设备 / 清缓存前导出</span>
+        <span>本地进度备份与导入</span>
+        <span className="backup-summary-hint">JSON 文件</span>
       </summary>
       <div className="backup-body">
         <p className="backup-hint">进度仅保存在当前浏览器本地，导出 JSON 文件可随时恢复。</p>

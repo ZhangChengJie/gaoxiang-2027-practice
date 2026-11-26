@@ -4,11 +4,11 @@ import { chapters, allQuestions } from '../data/content'
 import { useProgress } from '../hooks/useProgress'
 import { getChapterMeta } from '../lib/chapterMeta'
 import { accuracyOf, localDateKey, todayStat, weakestDomains } from '../lib/progress'
-import { getStudyPlanStatus, PLAN_TOTAL_DAYS, PLAN_TOTAL_WEEKS } from '../lib/studyPlan2705'
+import { getStudyPlanStatus, PLAN_TOTAL_WEEKS } from '../lib/studyPlan2705'
+import { getSyncCode } from '../lib/syncClient'
 import ProgressRing from '../components/ProgressRing'
 import { ThemeToggle } from '../components/ThemeToggle'
-import CloudSync from '../components/CloudSync'
-import DataBackup from '../components/DataBackup'
+import SyncSettingsSheet from '../components/SyncSettingsSheet'
 
 function accuracyClass(acc: number | null) {
   if (acc === null) return ''
@@ -25,6 +25,7 @@ const CHAPTER_TABS: { key: ChapterTab; label: string; match: (k: string) => bool
   { key: 'sprint', label: '案例/冲刺', match: (k) => /^(08|09|09a|10|11|16|17)-/.test(k) },
 ]
 
+const COLLAPSED_CHAPTER_COUNT = 6
 const DAY_MS = 24 * 60 * 60 * 1000
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -34,6 +35,10 @@ export default function Home() {
   const navigate = useNavigate()
   const { progress, chapterProgress, totalStats } = useProgress()
   const [chapterTab, setChapterTab] = useState<ChapterTab>('all')
+  const [showAllChapters, setShowAllChapters] = useState(false)
+  const [syncOpen, setSyncOpen] = useState(false)
+  const [hasSyncCode, setHasSyncCode] = useState(() => Boolean(getSyncCode()))
+
   const now = Date.now()
   const overall = chapterProgress(allChapterQuestions)
   const today = todayStat(progress, now)
@@ -60,22 +65,42 @@ export default function Home() {
   }, [progress.daily, now])
 
   const activeTabDef = CHAPTER_TABS.find((t) => t.key === chapterTab) ?? CHAPTER_TABS[0]
-  const visibleChapters = chapters.filter((c) => activeTabDef.match(c.key))
+  const filteredChapters = chapters.filter((c) => activeTabDef.match(c.key))
+  const canCollapse = chapterTab === 'all' && filteredChapters.length > COLLAPSED_CHAPTER_COUNT
+  const visibleChapters = canCollapse && !showAllChapters
+    ? filteredChapters.slice(0, COLLAPSED_CHAPTER_COUNT)
+    : filteredChapters
 
   return (
     <div className="page home-page">
       <header className="home-header">
         <div className="home-greeting">
           <h1>高项二轮练习</h1>
-          <p>2027 信息系统项目管理师</p>
+          <p>2027 信息系统项目管理师 · 第 {plan.week}/{PLAN_TOTAL_WEEKS} 周</p>
         </div>
-        <ThemeToggle />
+        <div className="home-header-actions">
+          <button
+            type="button"
+            className="header-icon-btn"
+            onClick={() => setSyncOpen(true)}
+            aria-label={hasSyncCode ? '同步与数据设置（已开启自动同步）' : '同步与数据设置（未绑定同步口令）'}
+            title={hasSyncCode ? '已开启自动同步' : '设置同步口令与备份'}
+          >
+            <span className="header-icon-svg" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.5 19H9a5 5 0 0 1-.8-9.93A6 6 0 0 1 19.8 11a4 4 0 0 1-2.3 8z" />
+              </svg>
+            </span>
+            <span className={`sync-dot ${hasSyncCode ? 'on' : 'off'}`} aria-hidden="true" />
+          </button>
+          <ThemeToggle />
+        </div>
       </header>
 
       <section className="home-overview-card" aria-label="学习概览">
         <div className="home-overview">
           <div className="home-overview-progress" role="img" aria-label={`章节总进度 ${overall.percent}%，已答 ${overall.done} / ${overall.total} 题`}>
-            <ProgressRing percent={overall.percent} size={48} />
+            <ProgressRing percent={overall.percent} size={44} />
             <span className="stat-label">总进度</span>
           </div>
           <div className="stat-item">
@@ -104,59 +129,72 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="plan-card" aria-label="2705 考期学习计划">
-        <div className="plan-card-top">
-          <div>
-            <div className="plan-card-badge">
-              2705 考期 · 第 {plan.week}/{PLAN_TOTAL_WEEKS} 周（第 {plan.dayIndex}/{PLAN_TOTAL_DAYS} 天）
-            </div>
-            <div className="plan-card-title">{plan.stage.label}</div>
-            <div className="plan-card-sub">
-              {plan.stage.shortTitle} · {plan.isFinished ? '基础期已收官' : plan.daysToCheckpoint === 0 ? '今日节点验收' : `距验收节点（${plan.stage.endDate.slice(5)}）还有 ${plan.daysToCheckpoint} 天`}
-            </div>
+      <section className="focus-card" aria-labelledby="today-title">
+        <div className="focus-today">
+          <div className="focus-today-info">
+            <h2 id="today-title">今日任务</h2>
+            <p>
+              到期错题 {totalStats.dueCount} 题 · 今日已答 {today.answered} 题
+              {todayAcc !== null && ` · 正确率 ${todayAcc}%`}
+            </p>
           </div>
-          <button
-            type="button"
-            className="action-btn plan-card-btn"
-            onClick={() => navigate(`/test/${plan.stage.checkpointKey}`)}
-          >
-            去验收
+          <button type="button" className="action-btn primary focus-start-btn" onClick={() => navigate('/today')}>
+            开始
           </button>
         </div>
-        <div className="plan-progress-bar" aria-hidden="true">
-          <span style={{ width: `${plan.percent}%` }} />
-        </div>
-      </section>
 
-      <section className="today-card" aria-labelledby="today-title">
-        <div className="today-info">
-          <h2 id="today-title">今日任务</h2>
-          <p>
-            到期错题 {totalStats.dueCount} 题 → 新题 · 今日已答 {today.answered} 题
-            {todayAcc !== null && `，正确率 ${todayAcc}%`}
-          </p>
+        <div className="focus-plan">
+          <div className="focus-plan-row">
+            <div className="focus-plan-meta">
+              <span className="focus-plan-stage">{plan.stage.label}</span>
+              <span className="focus-plan-days">
+                {plan.isFinished
+                  ? '基础期已收官'
+                  : plan.daysToCheckpoint === 0
+                    ? '今日节点验收'
+                    : `距验收(${plan.stage.endDate.slice(5)}) ${plan.daysToCheckpoint} 天`}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="focus-plan-link"
+              onClick={() => navigate(`/test/${plan.stage.checkpointKey}`)}
+            >
+              去验收 ›
+            </button>
+          </div>
+          <div className="plan-progress-bar" aria-hidden="true">
+            <span style={{ width: `${plan.percent}%` }} />
+          </div>
         </div>
-        <button type="button" className="action-btn primary" onClick={() => navigate('/today')}>
-          开始
-        </button>
       </section>
 
       <div className="quick-entries">
         <button type="button" className="mock-entry" onClick={() => navigate('/mock')}>
-          <span aria-hidden="true">📝</span>
+          <span className="quick-entry-icon tone-blue" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="3" width="16" height="18" rx="2.5" />
+              <path d="M8 8h8M8 12h8M8 16h5" />
+            </svg>
+          </span>
           <span className="mock-entry-text">
             <strong>机考模拟</strong>
             <span>75 题 · 150 分钟</span>
           </span>
-          <span aria-hidden="true">›</span>
+          <span className="quick-entry-arrow" aria-hidden="true">›</span>
         </button>
         <button type="button" className="mock-entry" onClick={() => navigate('/cheatsheet')}>
-          <span aria-hidden="true">📖</span>
+          <span className="quick-entry-icon tone-green" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+          </span>
           <span className="mock-entry-text">
             <strong>速查口袋书</strong>
             <span>ITTO · 公式 · 图卡</span>
           </span>
-          <span aria-hidden="true">›</span>
+          <span className="quick-entry-arrow" aria-hidden="true">›</span>
         </button>
       </div>
 
@@ -174,7 +212,10 @@ export default function Home() {
       )}
 
       <section className="home-section" aria-labelledby="chapter-grid-title">
-        <h2 className="section-title" id="chapter-grid-title">章节学习 <small className="section-hint">正确率 {'<'}60% 红 · 60–70% 橙 · ≥70% 绿</small></h2>
+        <div className="section-head-row">
+          <h2 className="section-title" id="chapter-grid-title">章节学习</h2>
+          <span className="section-hint">&lt;60% 红 · 60–70% 橙 · ≥70% 绿</span>
+        </div>
         <div className="chapter-tabs" role="tablist" aria-label="按阶段筛选章节">
           {CHAPTER_TABS.map((t) => (
             <button
@@ -194,6 +235,7 @@ export default function Home() {
             const prog = chapterProgress(c.questions)
             const meta = getChapterMeta(c.key)
             const acc = accuracyOf(progress, c.questions.map((q) => q.id)).accuracy
+            const code = c.key.split('-')[0]
             return (
               <button
                 key={c.key}
@@ -203,26 +245,39 @@ export default function Home() {
                 aria-label={c.title}
                 onClick={() => navigate(`/chapter/${c.key}`)}
               >
-                <span className="chapter-grid-icon" aria-hidden="true">{meta.emoji}</span>
-                <span className="chapter-grid-label">{meta.short}</span>
-                <span className="chapter-grid-progress" aria-hidden="true">
-                  <span style={{ width: `${prog.percent}%` }} />
-                </span>
-                <span className="chapter-grid-count">
-                  {prog.done}/{prog.total}
-                  {acc !== null && <span className={`chapter-grid-acc ${accuracyClass(acc)}`}> · {Math.round(acc * 100)}%</span>}
-                </span>
+                <div className="chapter-tile-top">
+                  <span className="chapter-code-badge" aria-hidden="true">{code}</span>
+                  <span className="chapter-grid-label">{meta.short}</span>
+                </div>
+                <div className="chapter-tile-bottom">
+                  <span className="chapter-grid-progress" aria-hidden="true">
+                    <span style={{ width: `${prog.percent}%` }} />
+                  </span>
+                  <span className="chapter-grid-count">
+                    {prog.done}/{prog.total}
+                    {acc !== null && <span className={`chapter-grid-acc ${accuracyClass(acc)}`}> · {Math.round(acc * 100)}%</span>}
+                  </span>
+                </div>
               </button>
             )
           })}
         </div>
+        {canCollapse && (
+          <button
+            type="button"
+            className="chapter-expand-btn"
+            onClick={() => setShowAllChapters((v) => !v)}
+          >
+            {showAllChapters ? '收起部分章节' : `展开全部 ${filteredChapters.length} 章`}
+          </button>
+        )}
       </section>
 
-      <CloudSync />
-
-      <DataBackup />
-
-      <p className="app-version">版本 {__APP_VERSION__}</p>
+      <SyncSettingsSheet
+        open={syncOpen}
+        onClose={() => setSyncOpen(false)}
+        onCodeChange={(code) => setHasSyncCode(Boolean(code))}
+      />
     </div>
   )
 }

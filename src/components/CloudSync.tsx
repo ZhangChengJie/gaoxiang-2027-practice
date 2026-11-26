@@ -18,7 +18,7 @@ function formatSyncTime(ts: number): string {
   return new Date(ts).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-export default function CloudSync() {
+export default function CloudSync({ onCodeChange }: { onCodeChange?: (code: string) => void } = {}) {
   const { replaceProgress } = useProgress()
   const { setRecords } = usePractice()
   const [boundCode, setBoundCode] = useState(getSyncCode)
@@ -40,6 +40,7 @@ export default function CloudSync() {
       setBoundCode(saved)
       setInputCode(saved)
       setLastSyncAt(res.updatedAt)
+      onCodeChange?.(saved)
       setStatus({
         kind: 'ok',
         text: res.pulledRemote
@@ -85,17 +86,18 @@ export default function CloudSync() {
     setBoundCode('')
     setInputCode('')
     setStatus(null)
+    onCodeChange?.('')
   }
 
   return (
     <section className="sync-card" aria-labelledby="sync-title">
       <div className="sync-head">
         <div>
-          <h2 id="sync-title" className="sync-title">☁️ 多设备云同步</h2>
+          <h2 id="sync-title" className="sync-title">多设备云同步</h2>
           <p className="sync-sub">
             {boundCode
-              ? `已绑定 · ${formatSyncTime(lastSyncAt)} · 切回前台与答题后自动双向合并`
-              : '工作手机 / 生活手机输入同一口令，进度、错题、案例与项目档案自动无损合并'}
+              ? `已开启自动同步 · ${formatSyncTime(lastSyncAt)}`
+              : '设置一次同步口令后，答题与进度将在多设备间自动静默合并'}
           </p>
         </div>
       </div>
@@ -118,7 +120,7 @@ export default function CloudSync() {
           </div>
           <div className="sync-quick-row">
             <button type="button" className="chip" disabled={syncing} onClick={handleGenerate}>
-              ✨ 首次使用：一键生成新口令并上传
+              首次使用：生成新口令并开启自动同步
             </button>
           </div>
         </div>
